@@ -16,8 +16,8 @@ const MembersList = ({ projectId }: { projectId: number }) => {
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('Member');
+  const [isSending, setIsSending] = useState(false); // ✅ حالة الإرسال
 
-  // جلب الأعضاء
   useEffect(() => {
     fetchMembers();
   }, [projectId]);
@@ -33,30 +33,49 @@ const MembersList = ({ projectId }: { projectId: number }) => {
     }
   };
 
-  // إرسال دعوة
   const sendInvitation = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('📤 [MembersList] Sending invitation...');
+    console.log('📤 projectId:', projectId);
+    console.log('📤 inviteEmail:', inviteEmail);
+    console.log('📤 inviteRole:', inviteRole);
+    
     if (!inviteEmail) {
+      console.warn('⚠️ No email provided');
       toast.error('Please enter an email address');
       return;
     }
 
+    if (!projectId) {
+      console.error('❌ projectId is undefined!');
+      toast.error('Project ID is missing');
+      return;
+    }
+
+    setIsSending(true); // ✅ بداية الإرسال
+
     try {
-      await apiClient.post('/invitations', {
+      console.log('📤 Sending POST request to /invitations');
+      const response = await apiClient.post('/invitations', {
         email: inviteEmail,
         project_id: projectId,
         role: inviteRole,
       });
       
+      console.log('✅ Invitation sent successfully:', response.data);
       toast.success(`Invitation sent to ${inviteEmail}`);
       setInviteEmail('');
       setShowInviteForm(false);
     } catch (error: any) {
+      console.error('❌ Failed to send invitation:', error);
+      console.error('❌ Error response:', error.response?.data);
       toast.error(error.response?.data?.detail || 'Failed to send invitation');
+    } finally {
+      setIsSending(false); // ✅ انتهاء الإرسال
     }
   };
 
-  // حذف عضو
   const removeMember = async (userId: number) => {
     if (!window.confirm('Are you sure you want to remove this member?')) return;
     try {
@@ -84,7 +103,6 @@ const MembersList = ({ projectId }: { projectId: number }) => {
         </button>
       </div>
 
-      {/* نموذج إرسال دعوة */}
       {showInviteForm && (
         <form onSubmit={sendInvitation} className="mb-4 p-3 bg-gray-50 rounded">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -95,11 +113,13 @@ const MembersList = ({ projectId }: { projectId: number }) => {
               onChange={(e) => setInviteEmail(e.target.value)}
               className="px-3 py-1 border rounded"
               required
+              disabled={isSending}
             />
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
               className="px-3 py-1 border rounded"
+              disabled={isSending}
             >
               <option value="Member">Member</option>
               <option value="Admin">Admin</option>
@@ -107,9 +127,14 @@ const MembersList = ({ projectId }: { projectId: number }) => {
             </select>
             <button
               type="submit"
-              className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+              disabled={isSending}
+              className={`px-3 py-1 rounded text-white transition-colors ${
+                isSending 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-green-600 hover:bg-green-700'
+              }`}
             >
-              Send Invite
+              {isSending ? 'Sending...' : 'Send Invite'}
             </button>
           </div>
           <p className="text-xs text-gray-500 mt-2">
@@ -118,7 +143,6 @@ const MembersList = ({ projectId }: { projectId: number }) => {
         </form>
       )}
 
-      {/* قائمة الأعضاء */}
       <div className="space-y-2">
         {members.map((member) => (
           <div key={member.user_id} className="flex justify-between items-center p-2 border-b">
