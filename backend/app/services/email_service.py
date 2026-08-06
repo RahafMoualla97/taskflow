@@ -2,9 +2,14 @@
 Email service for sending notifications via Resend API.
 """
 import resend
+import logging
 from typing import Optional
 
 from app.core.config import settings
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialize Resend with API key
 resend.api_key = settings.RESEND_API_KEY
@@ -33,16 +38,20 @@ class EmailService:
             True if email was sent successfully, False otherwise
         """
         try:
+            logger.info(f"📧 Attempting to send email to {to_email}")
+            logger.info(f"📧 FROM_EMAIL: {from_email or settings.FROM_EMAIL}")
+            logger.info(f"📧 RESEND_API_KEY: {settings.RESEND_API_KEY[:8]}...")
+            
             response = resend.Emails.send({
                 "from": f"TaskFlow <{from_email or settings.FROM_EMAIL}>",
                 "to": [to_email],
                 "subject": subject,
                 "html": html_content,
             })
-            print(f"✅ Email sent to {to_email}: {response}")
+            logger.info(f"✅ Email sent to {to_email}: {response}")
             return True
         except Exception as e:
-            print(f"❌ Email send failed: {e}")
+            logger.error(f"❌ Email send failed: {e}")
             return False
 
     @staticmethod
