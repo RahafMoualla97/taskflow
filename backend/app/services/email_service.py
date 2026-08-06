@@ -32,18 +32,6 @@ class EmailService:
     ) -> bool:
         """
         Send email using SMTP with SSL.
-
-        This method uses SMTP_SSL on port 465 for Gmail.
-        Falls back to STARTTLS on port 587 if SSL fails.
-
-        Args:
-            to_email: Recipient email address
-            subject: Email subject line
-            html_content: HTML content of the email
-            from_email: Sender email (defaults to settings.FROM_EMAIL)
-
-        Returns:
-            True if email was sent successfully, False otherwise
         """
         try:
             logger.info(f"SMTP: Attempting to send email to {to_email}")
@@ -56,11 +44,9 @@ class EmailService:
 
             msg.attach(MIMEText(html_content, 'html'))
 
-            # Try SSL first (port 465)
             if settings.EMAIL_PORT == 465:
                 server = smtplib.SMTP_SSL(settings.EMAIL_HOST, settings.EMAIL_PORT)
             else:
-                # Fallback to STARTTLS (port 587)
                 server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
                 server.starttls()
 
@@ -76,69 +62,6 @@ class EmailService:
             return False
 
     @staticmethod
-    def _send_email_api(
-        to_email: str,
-        subject: str,
-        html_content: str,
-        from_email: Optional[str] = None
-    ) -> bool:
-        """
-        Send email using Brevo HTTP API.
-
-        This is the recommended method for production.
-        - No IP restrictions
-        - Faster response times
-        - Better logging and analytics
-
-        Args:
-            to_email: Recipient email address
-            subject: Email subject line
-            html_content: HTML content of the email
-            from_email: Sender email (defaults to settings.FROM_EMAIL)
-
-        Returns:
-            True if email was sent successfully, False otherwise
-        """
-        try:
-            logger.info(f"API: Attempting to send email to {to_email}")
-
-            if not settings.BREVO_API_KEY:
-                logger.warning("BREVO_API_KEY not set, falling back to SMTP")
-                return EmailService._send_email_smtp(to_email, subject, html_content, from_email)
-
-            url = "https://api.brevo.com/v3/smtp/email"
-            headers = {
-                "accept": "application/json",
-                "api-key": settings.BREVO_API_KEY,
-                "content-type": "application/json"
-            }
-            data = {
-                "sender": {
-                    "name": "TaskFlow",
-                    "email": from_email or settings.FROM_EMAIL
-                },
-                "to": [{"email": to_email}],
-                "subject": subject,
-                "htmlContent": html_content
-            }
-
-            response = requests.post(url, json=data, headers=headers, timeout=30)
-
-            if response.status_code == 201:
-                logger.info(f"API: Email sent successfully to {to_email}")
-                return True
-            else:
-                logger.error(f"API: Failed to send email: {response.text}")
-                return False
-
-        except requests.exceptions.Timeout:
-            logger.error(f"API: Timeout sending email to {to_email}")
-            return False
-        except Exception as e:
-            logger.error(f"API: Email send failed: {e}")
-            return False
-
-    @staticmethod
     def _send_email(
         to_email: str,
         subject: str,
@@ -146,15 +69,9 @@ class EmailService:
         from_email: Optional[str] = None
     ) -> bool:
         """
-        Send email using the preferred method.
-
-        Prefers API if configured, otherwise uses SMTP.
+        Send email using SMTP.
         """
-        # Prefer API if configured, otherwise use SMTP
-        if settings.BREVO_API_KEY:
-            return EmailService._send_email_api(to_email, subject, html_content, from_email)
-        else:
-            return EmailService._send_email_smtp(to_email, subject, html_content, from_email)
+        return EmailService._send_email_smtp(to_email, subject, html_content, from_email)
 
     @staticmethod
     def send_invitation_email(
