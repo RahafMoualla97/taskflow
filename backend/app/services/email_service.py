@@ -39,10 +39,10 @@ class EmailService:
                 "subject": subject,
                 "html": html_content,
             })
-            print(f"Email sent successfully to {to_email}: {response}")
+            print(f"✅ Email sent to {to_email}: {response}")
             return True
         except Exception as e:
-            print(f"Email send failed: {e}")
+            print(f"❌ Email send failed: {e}")
             return False
 
     @staticmethod
