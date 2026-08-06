@@ -33,21 +33,10 @@ app = FastAPI(
 
 # ========== Middleware Configuration ==========
 
-# CORS Configuration - Allow frontend applications to access the API
+# CORS Configuration - Allow all origins for testing (update for production)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        # Local development
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-        "http://localhost:8000",
-        # Production - Vercel frontend
-        "https://taskflow-three-flax.vercel.app",
-        # Allow all origins temporarily for testing (remove in production)
-        # "*",
-    ],
+    allow_origins=["*"],  # Allow all origins for testing
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
