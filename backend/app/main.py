@@ -33,19 +33,28 @@ app = FastAPI(
 
 # ========== Middleware Configuration ==========
 
-# Configure CORS for frontend communication
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",  # Vite development server
-        "https://taskflow-three-flax.vercel.app", # Production frontend
-    
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "https://taskflow-three-flax.vercel.app",
+        "https://taskflow-r4v42gpur-rahaf-moualla.vercel.app",
     ],
-    
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.SECRET_KEY,
+    session_cookie="taskflow_session"
+)
+
 
 # ========== Router Registration ==========
 
@@ -56,12 +65,6 @@ app.include_router(v1_router, prefix="/api/v1")
 
 @app.get("/")
 async def root():
-    """
-    Root endpoint with API information.
-
-    Returns:
-        Dictionary with API version and documentation links
-    """
     return {
         "message": "TaskFlow API is running!",
         "version": "1.0.0",
@@ -71,18 +74,11 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """
-    Health check endpoint for monitoring.
-
-    Returns:
-        Dictionary with service status
-    """
     return {"status": "healthy", "database": "connected"}
 
 
 # ========== Background Scheduler ==========
 
-# Initialize scheduler for deadline reminders
 scheduler = BackgroundScheduler()
 scheduler.add_job(
     send_deadline_reminders,
@@ -98,9 +94,6 @@ scheduler.start()
 
 @app.on_event("shutdown")
 def shutdown_scheduler():
-    """
-    Gracefully shut down the background scheduler on application exit.
-    """
     if scheduler.running:
         scheduler.shutdown()
 
