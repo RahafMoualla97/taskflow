@@ -40,11 +40,17 @@ class Settings(BaseSettings):
     # ========== Frontend ==========
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
-    # ========== Email ==========
+    # ========== Email Configuration ==========
+    # Option 1: SMTP (Traditional)
     EMAIL_HOST: str = os.getenv("EMAIL_HOST", "smtp.gmail.com")
     EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "587"))
     EMAIL_USERNAME: str = os.getenv("EMAIL_USERNAME", "")
     EMAIL_PASSWORD: str = os.getenv("EMAIL_PASSWORD", "")
+    
+    # Option 2: HTTP API (Recommended for production)
+    BREVO_API_KEY: str = os.getenv("BREVO_API_KEY", "")
+    
+    # Sender email address
     FROM_EMAIL: str = os.getenv("FROM_EMAIL", "noreply@taskflow.com")
 
     # ========== Environment ==========
