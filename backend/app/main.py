@@ -41,6 +41,8 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://127.0.0.1:3000",
         "http://localhost:8000",
+        "https://taskflow-three-flax.vercel.app",
+        "https://taskflow-8ra76u1g0-rahaf-moualla.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
