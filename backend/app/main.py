@@ -33,31 +33,27 @@ app = FastAPI(
 
 # ========== Middleware Configuration ==========
 
+# CORS Configuration - Allow frontend applications to access the API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        # Local development
         "http://localhost:5173",
         "http://localhost:3000",
         "http://127.0.0.1:5173",
         "http://127.0.0.1:3000",
         "http://localhost:8000",
+        # Production - Vercel frontend
         "https://taskflow-three-flax.vercel.app",
-        "https://taskflow-8ra76u1g0-rahaf-moualla.vercel.app",
+        # Allow all origins temporarily for testing (remove in production)
+        # "*",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Production CORS (commented out for development)
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
+# Session middleware for Google OAuth
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
@@ -100,6 +96,7 @@ async def health_check():
 
 # ========== Background Scheduler ==========
 
+# Initialize scheduler for deadline reminders
 scheduler = BackgroundScheduler()
 scheduler.add_job(
     send_deadline_reminders,
