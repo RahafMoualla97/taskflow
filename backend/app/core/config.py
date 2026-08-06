@@ -49,6 +49,7 @@ class Settings(BaseSettings):
     
     # Resend API Key for email sending
     RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")
+    print(f"🔑 RESEND_API_KEY loaded: {bool(RESEND_API_KEY)}")  # ✅ أضيفي هذا السطر
 
     # ========== Environment ==========
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
