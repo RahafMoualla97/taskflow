@@ -41,9 +41,9 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
     # ========== Email Configuration ==========
-    # Option 1: SMTP (Traditional)
+    # Option 1: SMTP (Traditional) - Works with Gmail, SendGrid, Brevo SMTP
     EMAIL_HOST: str = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-    EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "587"))
+    EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "465"))  # 465 for SSL
     EMAIL_USERNAME: str = os.getenv("EMAIL_USERNAME", "")
     EMAIL_PASSWORD: str = os.getenv("EMAIL_PASSWORD", "")
     

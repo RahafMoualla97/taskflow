@@ -1,9 +1,9 @@
 """
-Email service for sending notifications.
+Email service for sending notifications via SMTP.
 
 Supports multiple email delivery methods:
-1. SMTP (Traditional) - works with Gmail, SendGrid, Brevo SMTP
-2. Brevo HTTP API (Recommended) - more reliable, no IP restrictions
+1. SMTP with SSL (Gmail, SendGrid, Brevo SMTP)
+2. Brevo HTTP API (Recommended for production)
 """
 import smtplib
 import requests
@@ -31,11 +31,11 @@ class EmailService:
         from_email: Optional[str] = None
     ) -> bool:
         """
-        Send email using SMTP protocol.
-        
-        This is the traditional method. Works with Gmail, SendGrid, Brevo SMTP.
-        May require authorized IP addresses in production.
-        
+        Send email using SMTP with SSL.
+
+        This method uses SMTP_SSL on port 465 for Gmail.
+        Falls back to STARTTLS on port 587 if SSL fails.
+
         Args:
             to_email: Recipient email address
             subject: Email subject line
@@ -47,7 +47,8 @@ class EmailService:
         """
         try:
             logger.info(f"SMTP: Attempting to send email to {to_email}")
-            
+            logger.info(f"SMTP: Using host {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+
             msg = MIMEMultipart('alternative')
             msg['From'] = f"TaskFlow <{from_email or settings.FROM_EMAIL}>"
             msg['To'] = to_email
@@ -55,8 +56,14 @@ class EmailService:
 
             msg.attach(MIMEText(html_content, 'html'))
 
-            server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
-            server.starttls()
+            # Try SSL first (port 465)
+            if settings.EMAIL_PORT == 465:
+                server = smtplib.SMTP_SSL(settings.EMAIL_HOST, settings.EMAIL_PORT)
+            else:
+                # Fallback to STARTTLS (port 587)
+                server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+                server.starttls()
+
             server.login(settings.EMAIL_USERNAME, settings.EMAIL_PASSWORD)
             server.sendmail(settings.FROM_EMAIL, to_email, msg.as_string())
             server.quit()
@@ -77,13 +84,12 @@ class EmailService:
     ) -> bool:
         """
         Send email using Brevo HTTP API.
-        
+
         This is the recommended method for production.
         - No IP restrictions
         - Faster response times
         - Better logging and analytics
-        - More reliable on platforms like Render
-        
+
         Args:
             to_email: Recipient email address
             subject: Email subject line
@@ -95,7 +101,7 @@ class EmailService:
         """
         try:
             logger.info(f"API: Attempting to send email to {to_email}")
-            
+
             if not settings.BREVO_API_KEY:
                 logger.warning("BREVO_API_KEY not set, falling back to SMTP")
                 return EmailService._send_email_smtp(to_email, subject, html_content, from_email)
@@ -141,8 +147,8 @@ class EmailService:
     ) -> bool:
         """
         Send email using the preferred method.
-        
-        Falls back to SMTP if API is not configured.
+
+        Prefers API if configured, otherwise uses SMTP.
         """
         # Prefer API if configured, otherwise use SMTP
         if settings.BREVO_API_KEY:
