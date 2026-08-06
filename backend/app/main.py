@@ -33,22 +33,17 @@ app = FastAPI(
 
 # ========== Middleware Configuration ==========
 
+# CORS Configuration - Allow all origins for testing
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-        "http://localhost:8000",
-        "https://taskflow-three-flax.vercel.app",
-        "https://taskflow-r4v42gpur-rahaf-moualla.vercel.app",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
+# Session middleware for Google OAuth
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
