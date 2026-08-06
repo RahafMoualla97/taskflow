@@ -46,10 +46,6 @@ class Settings(BaseSettings):
     EMAIL_USERNAME: str = os.getenv("EMAIL_USERNAME", "")
     EMAIL_PASSWORD: str = os.getenv("EMAIL_PASSWORD", "")
     FROM_EMAIL: str = os.getenv("FROM_EMAIL", "noreply@taskflow.com")
-    
-    # Resend API Key for email sending
-    RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")
-    print(f"🔑 RESEND_API_KEY loaded: {bool(RESEND_API_KEY)}")  # ✅ أضيفي هذا السطر
 
     # ========== Environment ==========
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")

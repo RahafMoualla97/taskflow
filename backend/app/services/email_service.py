@@ -1,22 +1,19 @@
 """
-Email service for sending notifications via Resend API.
+Email service for sending notifications via SMTP.
 """
-import resend
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import logging
 from typing import Optional
 
 from app.core.config import settings
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Initialize Resend with API key
-resend.api_key = settings.RESEND_API_KEY
 
 
 class EmailService:
-    """Service for sending email notifications using Resend."""
+    """Service for sending email notifications using SMTP."""
 
     @staticmethod
     def _send_email(
@@ -26,7 +23,7 @@ class EmailService:
         from_email: Optional[str] = None
     ) -> bool:
         """
-        Send an email using Resend API.
+        Send an email via SMTP.
 
         Args:
             to_email: Recipient email address
@@ -38,17 +35,23 @@ class EmailService:
             True if email was sent successfully, False otherwise
         """
         try:
-            logger.info(f"📧 Attempting to send email to {to_email}")
-            logger.info(f"📧 FROM_EMAIL: {from_email or settings.FROM_EMAIL}")
-            logger.info(f"📧 RESEND_API_KEY: {settings.RESEND_API_KEY[:8]}...")
+            logger.info(f"Attempting to send email to {to_email}")
+            logger.info(f"FROM_EMAIL: {from_email or settings.FROM_EMAIL}")
             
-            response = resend.Emails.send({
-                "from": f"TaskFlow <{from_email or settings.FROM_EMAIL}>",
-                "to": [to_email],
-                "subject": subject,
-                "html": html_content,
-            })
-            logger.info(f"✅ Email sent to {to_email}: {response}")
+            msg = MIMEMultipart('alternative')
+            msg['From'] = f"TaskFlow <{from_email or settings.FROM_EMAIL}>"
+            msg['To'] = to_email
+            msg['Subject'] = subject
+
+            msg.attach(MIMEText(html_content, 'html'))
+
+            server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+            server.starttls()
+            server.login(settings.EMAIL_USERNAME, settings.EMAIL_PASSWORD)
+            server.sendmail(settings.FROM_EMAIL, to_email, msg.as_string())
+            server.quit()
+
+            logger.info(f"✅ Email sent to {to_email}")
             return True
         except Exception as e:
             logger.error(f"❌ Email send failed: {e}")
@@ -63,15 +66,6 @@ class EmailService:
     ) -> bool:
         """
         Send a project invitation email.
-
-        Args:
-            to_email: Recipient email address
-            token: Unique invitation token for acceptance
-            project_name: Name of the project being invited to
-            inviter_name: Name of the user who sent the invitation
-
-        Returns:
-            True if email was sent successfully, False otherwise
         """
         accept_url = f"{settings.FRONTEND_URL}/invitations/accept?token={token}"
         subject = f"Invitation to join {project_name} on TaskFlow"
@@ -126,15 +120,6 @@ class EmailService:
     ) -> bool:
         """
         Send a task assignment notification email.
-
-        Args:
-            to_email: Recipient email address
-            task_title: Title of the assigned task
-            project_name: Name of the project
-            assigner_name: Name of the user who assigned the task
-
-        Returns:
-            True if email was sent successfully, False otherwise
         """
         subject = f"New task assigned: {task_title}"
         task_url = f"{settings.FRONTEND_URL}/tasks"
