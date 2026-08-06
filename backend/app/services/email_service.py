@@ -1,9 +1,15 @@
 """
-Email service for sending notifications via SMTP.
+Email service for sending notifications.
 
 Supports multiple email delivery methods:
-1. SMTP with SSL (Gmail, SendGrid, Brevo SMTP)
+1. SMTP (Traditional) - works with Gmail, SendGrid, Brevo SMTP
+   - Uses ports 25, 465, or 587
+   - May have issues on Render Free Plan due to outbound port restrictions
 2. Brevo HTTP API (Recommended for production)
+   - Uses port 443 (HTTPS)
+   - Works reliably on all platforms including Render Free Plan
+   - No IP whitelisting required
+   - Better logging and analytics
 """
 import smtplib
 import requests
@@ -20,7 +26,10 @@ logger = logging.getLogger(__name__)
 class EmailService:
     """
     Service for sending email notifications.
-    Supports both SMTP and HTTP API delivery methods.
+    
+    Supports two delivery methods:
+    - SMTP (traditional, may have port restrictions)
+    - Brevo HTTP API (recommended, uses HTTPS port 443)
     """
 
     @staticmethod
@@ -31,7 +40,19 @@ class EmailService:
         from_email: Optional[str] = None
     ) -> bool:
         """
-        Send email using SMTP with SSL.
+        Send email using SMTP protocol.
+        
+        This is the traditional method. Works with Gmail, SendGrid, Brevo SMTP.
+        Note: May not work on Render Free Plan due to outbound port restrictions.
+        
+        Args:
+            to_email: Recipient email address
+            subject: Email subject line
+            html_content: HTML content of the email
+            from_email: Sender email (defaults to settings.FROM_EMAIL)
+
+        Returns:
+            True if email was sent successfully, False otherwise
         """
         try:
             logger.info(f"SMTP: Attempting to send email to {to_email}")
@@ -62,6 +83,71 @@ class EmailService:
             return False
 
     @staticmethod
+    def _send_email_api(
+        to_email: str,
+        subject: str,
+        html_content: str,
+        from_email: Optional[str] = None
+    ) -> bool:
+        """
+        Send email using Brevo HTTP API.
+        
+        This is the recommended method for production.
+        - Uses port 443 (HTTPS) - works everywhere
+        - No IP restrictions
+        - Faster response times
+        - Better logging and analytics
+        - Works reliably on Render Free Plan
+        
+        Args:
+            to_email: Recipient email address
+            subject: Email subject line
+            html_content: HTML content of the email
+            from_email: Sender email (defaults to settings.FROM_EMAIL)
+
+        Returns:
+            True if email was sent successfully, False otherwise
+        """
+        try:
+            logger.info(f"API: Attempting to send email to {to_email}")
+
+            if not settings.BREVO_API_KEY:
+                logger.warning("BREVO_API_KEY not set, falling back to SMTP")
+                return EmailService._send_email_smtp(to_email, subject, html_content, from_email)
+
+            url = "https://api.brevo.com/v3/smtp/email"
+            headers = {
+                "accept": "application/json",
+                "api-key": settings.BREVO_API_KEY,
+                "content-type": "application/json"
+            }
+            data = {
+                "sender": {
+                    "name": "TaskFlow",
+                    "email": from_email or settings.FROM_EMAIL
+                },
+                "to": [{"email": to_email}],
+                "subject": subject,
+                "htmlContent": html_content
+            }
+
+            response = requests.post(url, json=data, headers=headers, timeout=30)
+
+            if response.status_code == 201:
+                logger.info(f"API: Email sent successfully to {to_email}")
+                return True
+            else:
+                logger.error(f"API: Failed to send email: {response.text}")
+                return False
+
+        except requests.exceptions.Timeout:
+            logger.error(f"API: Timeout sending email to {to_email}")
+            return False
+        except Exception as e:
+            logger.error(f"API: Email send failed: {e}")
+            return False
+
+    @staticmethod
     def _send_email(
         to_email: str,
         subject: str,
@@ -69,9 +155,16 @@ class EmailService:
         from_email: Optional[str] = None
     ) -> bool:
         """
-        Send email using SMTP.
+        Send email using the preferred method.
+        
+        Priority:
+        1. Brevo HTTP API (if BREVO_API_KEY is set)
+        2. SMTP (fallback)
         """
-        return EmailService._send_email_smtp(to_email, subject, html_content, from_email)
+        if settings.BREVO_API_KEY:
+            return EmailService._send_email_api(to_email, subject, html_content, from_email)
+        else:
+            return EmailService._send_email_smtp(to_email, subject, html_content, from_email)
 
     @staticmethod
     def send_invitation_email(

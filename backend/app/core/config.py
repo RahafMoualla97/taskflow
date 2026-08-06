@@ -41,17 +41,19 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
     # ========== Email Configuration ==========
-    # Option 1: SMTP (Traditional) - Works with Gmail, SendGrid, Brevo SMTP
+    # Option 1: SMTP (Traditional - requires open ports 25/465/587)
+    # Note: May not work on Render Free Plan due to outbound port restrictions
     EMAIL_HOST: str = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-    EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "465"))  # 465 for SSL
+    EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "587"))
     EMAIL_USERNAME: str = os.getenv("EMAIL_USERNAME", "")
     EMAIL_PASSWORD: str = os.getenv("EMAIL_PASSWORD", "")
     
     # Option 2: HTTP API (Recommended for production)
+    # Uses port 443 (HTTPS) - works on all platforms including Render Free Plan
     BREVO_API_KEY: str = os.getenv("BREVO_API_KEY", "")
     
-    # Sender email address
-    FROM_EMAIL: str = os.getenv("FROM_EMAIL", "noreply@taskflow.com")
+    # Sender email address (used by both methods)
+    FROM_EMAIL: str = os.getenv("FROM_EMAIL", "rahafmoualla31297@gmail.com")
 
     # ========== Environment ==========
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
