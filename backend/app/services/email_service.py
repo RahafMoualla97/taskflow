@@ -1,21 +1,17 @@
 """
-Email service for sending notifications via SMTP.
-
-This service handles:
-- Project invitation emails with accept links
-- Task assignment notifications
-- HTML email templates with styling
+Email service for sending notifications via Resend API.
 """
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import resend
 from typing import Optional
 
 from app.core.config import settings
 
+# Initialize Resend with API key
+resend.api_key = settings.RESEND_API_KEY
+
 
 class EmailService:
-    """Service for sending various types of email notifications."""
+    """Service for sending email notifications using Resend."""
 
     @staticmethod
     def _send_email(
@@ -25,7 +21,7 @@ class EmailService:
         from_email: Optional[str] = None
     ) -> bool:
         """
-        Internal method to send an email via SMTP.
+        Send an email using Resend API.
 
         Args:
             to_email: Recipient email address
@@ -37,21 +33,14 @@ class EmailService:
             True if email was sent successfully, False otherwise
         """
         try:
-            msg = MIMEMultipart('alternative')
-            msg['From'] = f"TaskFlow <{from_email or settings.FROM_EMAIL}>"
-            msg['To'] = to_email
-            msg['Subject'] = subject
-
-            msg.attach(MIMEText(html_content, 'html'))
-
-            server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
-            server.starttls()
-            server.login(settings.EMAIL_USERNAME, settings.EMAIL_PASSWORD)
-            server.sendmail(settings.FROM_EMAIL, to_email, msg.as_string())
-            server.quit()
-
+            response = resend.Emails.send({
+                "from": f"TaskFlow <{from_email or settings.FROM_EMAIL}>",
+                "to": [to_email],
+                "subject": subject,
+                "html": html_content,
+            })
+            print(f"Email sent successfully to {to_email}: {response}")
             return True
-
         except Exception as e:
             print(f"Email send failed: {e}")
             return False
