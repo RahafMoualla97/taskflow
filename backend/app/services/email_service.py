@@ -2,9 +2,9 @@
 Email service for sending notifications via SMTP.
 """
 import smtplib
+import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import logging
 from typing import Optional
 
 from app.core.config import settings
@@ -37,7 +37,7 @@ class EmailService:
         try:
             logger.info(f"Attempting to send email to {to_email}")
             logger.info(f"FROM_EMAIL: {from_email or settings.FROM_EMAIL}")
-            
+
             msg = MIMEMultipart('alternative')
             msg['From'] = f"TaskFlow <{from_email or settings.FROM_EMAIL}>"
             msg['To'] = to_email
@@ -51,10 +51,10 @@ class EmailService:
             server.sendmail(settings.FROM_EMAIL, to_email, msg.as_string())
             server.quit()
 
-            logger.info(f"✅ Email sent to {to_email}")
+            logger.info(f"Email sent successfully to {to_email}")
             return True
         except Exception as e:
-            logger.error(f"❌ Email send failed: {e}")
+            logger.error(f"Email send failed: {e}")
             return False
 
     @staticmethod
