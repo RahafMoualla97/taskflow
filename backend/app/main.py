@@ -33,22 +33,19 @@ app = FastAPI(
 
 # ========== Middleware Configuration ==========
 
-# CORS Configuration - Allow all origins for testing (update for production)
+# Configure CORS for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for testing
+    allow_origins=[
+        "http://localhost:5173",  # Vite development server
+        "https://taskflow-three-flax.vercel.app", # Production frontend
+    
+    ],
+    
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Session middleware for Google OAuth
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=settings.SECRET_KEY,
-    session_cookie="taskflow_session"
-)
-
 
 # ========== Router Registration ==========
 
