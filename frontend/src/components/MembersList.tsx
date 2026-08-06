@@ -36,43 +36,29 @@ const MembersList = ({ projectId }: { projectId: number }) => {
   const sendInvitation = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('📤 [MembersList] Sending invitation...');
-    console.log('📤 projectId:', projectId);
-    console.log('📤 inviteEmail:', inviteEmail);
-    console.log('📤 inviteRole:', inviteRole);
-    
     if (!inviteEmail) {
-      console.warn('⚠️ No email provided');
       toast.error('Please enter an email address');
       return;
     }
 
-    if (!projectId) {
-      console.error('❌ projectId is undefined!');
-      toast.error('Project ID is missing');
-      return;
-    }
-
-    setIsSending(true); // ✅ بداية الإرسال
+    setIsSending(true);
 
     try {
-      console.log('📤 Sending POST request to /invitations');
-      const response = await apiClient.post('/invitations', {
+      const response = await apiClient.post('/invitations/', {  // ✅ أضيفي `/`
         email: inviteEmail,
         project_id: projectId,
         role: inviteRole,
       });
       
-      console.log('✅ Invitation sent successfully:', response.data);
+      console.log('✅ Invitation sent:', response.data);
       toast.success(`Invitation sent to ${inviteEmail}`);
       setInviteEmail('');
       setShowInviteForm(false);
     } catch (error: any) {
-      console.error('❌ Failed to send invitation:', error);
-      console.error('❌ Error response:', error.response?.data);
+      console.error('❌ Error:', error);
       toast.error(error.response?.data?.detail || 'Failed to send invitation');
     } finally {
-      setIsSending(false); // ✅ انتهاء الإرسال
+      setIsSending(false);
     }
   };
 
