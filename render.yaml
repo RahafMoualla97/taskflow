@@ -33,7 +33,7 @@ services:
       - key: FROM_EMAIL
         sync: false
 
-  # ===== قاعدة البيانات =====
+  # ===== DataBase=====
   - type: postgresql
     name: taskflow-db
     plan: free
