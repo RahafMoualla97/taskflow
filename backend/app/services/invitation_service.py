@@ -116,12 +116,15 @@ class InvitationService:
         user = db.query(User).filter(User.id == inviter_id).first()
         inviter_name = user.name if user else "Someone"
 
-        EmailService.send_invitation_email(
-            to_email=inv_data.email,
-            token=new_invitation.token,
-            project_name=project.name,
-            inviter_name=inviter_name
-        )
+        try:
+            EmailService.send_invitation_email(
+                to_email=inv_data.email,
+                token=new_invitation.token,
+                project_name=project.name,
+                inviter_name=inviter_name
+            )
+        except Exception as e:
+            print(f"Failed to send invitation email: {e}")
 
         return new_invitation
 
