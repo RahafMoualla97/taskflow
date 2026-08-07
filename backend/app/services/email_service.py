@@ -7,11 +7,15 @@ This service handles:
 - HTML email templates with styling
 """
 import smtplib
+import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
 
 from app.core.config import settings
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 
 class EmailService:
@@ -37,26 +41,57 @@ class EmailService:
             True if email was sent successfully, False otherwise
         """
         try:
+            logger.info(f"📧 [START] Sending email to {to_email}")
+            logger.info(f"📧 [STEP 1] Subject: {subject}")
+            logger.info(f"📧 [STEP 1] From: {from_email or settings.FROM_EMAIL}")
+
             msg = MIMEMultipart('alternative')
             msg['From'] = f"TaskFlow <{from_email or settings.FROM_EMAIL}>"
             msg['To'] = to_email
             msg['Subject'] = subject
 
-            # Attach HTML content
             msg.attach(MIMEText(html_content, 'html'))
+            logger.info("📧 [STEP 2] Email message created")
 
-            # Connect to SMTP server and send
-            server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
-            server.starttls()
+            logger.info(f"📧 [STEP 3] Connecting to {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+
+            # Connect to SMTP server
+            if settings.EMAIL_PORT == 465:
+                logger.info("📧 [STEP 3] Using SSL connection (port 465)")
+                server = smtplib.SMTP_SSL(settings.EMAIL_HOST, settings.EMAIL_PORT)
+            else:
+                logger.info("📧 [STEP 3] Using STARTTLS connection (port 587)")
+                server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+                server.starttls()
+
+            logger.info("📧 [STEP 4] Connection established, logging in...")
             server.login(settings.EMAIL_USERNAME, settings.EMAIL_PASSWORD)
+            logger.info("📧 [STEP 5] Login successful")
+
+            logger.info(f"📧 [STEP 6] Sending email to {to_email}...")
             server.sendmail(settings.FROM_EMAIL, to_email, msg.as_string())
             server.quit()
 
-            print(f"✅ Email sent to {to_email}")
+            logger.info(f"✅ Email sent successfully to {to_email}")
             return True
 
+        except smtplib.SMTPAuthenticationError as e:
+            logger.error(f"❌ SMTP Authentication failed: {e}")
+            logger.error("❌ Please check EMAIL_USERNAME and EMAIL_PASSWORD")
+            return False
+
+        except smtplib.SMTPException as e:
+            logger.error(f"❌ SMTP error: {e}")
+            return False
+
+        except ConnectionError as e:
+            logger.error(f"❌ Connection error: {e}")
+            logger.error("❌ Network unreachable - Render may be blocking SMTP ports")
+            logger.error("❌ Try changing EMAIL_PORT to 465 or use a different email service")
+            return False
+
         except Exception as e:
-            print(f"❌ Error sending email to {to_email}: {str(e)}")
+            logger.error(f"❌ Error sending email to {to_email}: {str(e)}")
             return False
 
     @staticmethod
@@ -78,6 +113,11 @@ class EmailService:
         Returns:
             True if email was sent successfully, False otherwise
         """
+        logger.info("=" * 60)
+        logger.info(f"📧 [INVITATION] Sending invitation to {to_email}")
+        logger.info(f"📧 [INVITATION] Project: {project_name}")
+        logger.info(f"📧 [INVITATION] Inviter: {inviter_name}")
+
         accept_url = f"{settings.FRONTEND_URL}/invitations/accept?token={token}"
         subject = f"Invitation to join {project_name} on TaskFlow"
 
@@ -120,7 +160,15 @@ class EmailService:
         </html>
         """
 
-        return EmailService._send_email(to_email, subject, html_content)
+        result = EmailService._send_email(to_email, subject, html_content)
+
+        if result:
+            logger.info(f"✅ Invitation email sent to {to_email}")
+        else:
+            logger.error(f"❌ Failed to send invitation email to {to_email}")
+
+        logger.info("=" * 60)
+        return result
 
     @staticmethod
     def send_task_assignment_email(
@@ -141,6 +189,11 @@ class EmailService:
         Returns:
             True if email was sent successfully, False otherwise
         """
+        logger.info("=" * 60)
+        logger.info(f"📧 [TASK_ASSIGN] Sending task assignment to {to_email}")
+        logger.info(f"📧 [TASK_ASSIGN] Task: {task_title}")
+        logger.info(f"📧 [TASK_ASSIGN] Project: {project_name}")
+
         subject = f"New task assigned: {task_title}"
         task_url = f"{settings.FRONTEND_URL}/tasks"
 
@@ -182,4 +235,12 @@ class EmailService:
         </html>
         """
 
-        return EmailService._send_email(to_email, subject, html_content)
+        result = EmailService._send_email(to_email, subject, html_content)
+
+        if result:
+            logger.info(f"✅ Task assignment email sent to {to_email}")
+        else:
+            logger.error(f"❌ Failed to send task assignment email to {to_email}")
+
+        logger.info("=" * 60)
+        return result

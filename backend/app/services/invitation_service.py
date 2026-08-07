@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta, timezone
 import uuid
+import logging
 from typing import Optional
 
 from app.core.config import settings
@@ -21,6 +22,8 @@ from app.models.user import User
 from app.models.task import Task
 from app.schemas.invitation import InvitationCreate
 from app.services.email_service import EmailService
+
+logger = logging.getLogger(__name__)
 
 
 class InvitationService:
@@ -48,16 +51,23 @@ class InvitationService:
             HTTPException 403: User lacks permission (not Owner or Admin)
             HTTPException 400: Email already a member or pending invitation
         """
+        logger.info("=" * 60)
+        logger.info(f"📨 [INVITE] Creating invitation for {inv_data.email}")
+        logger.info(f"📨 [INVITE] Project ID: {inv_data.project_id}")
+        logger.info(f"📨 [INVITE] Role: {inv_data.role}")
+
         # Verify project exists
         project = db.query(Project).filter(
             Project.id == inv_data.project_id,
             Project.is_deleted == False
         ).first()
         if not project:
+            logger.error(f"❌ Project {inv_data.project_id} not found")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Project not found"
             )
+        logger.info(f"✅ Project found: {project.name}")
 
         # Verify inviter has permission (Owner or Admin)
         inviter = db.query(ProjectMember).filter(
@@ -67,10 +77,12 @@ class InvitationService:
             ProjectMember.is_deleted == False
         ).first()
         if not inviter:
+            logger.error(f"❌ User {inviter_id} is not Owner or Admin")
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only Owner or Admin can send invitations"
             )
+        logger.info(f"✅ Inviter has permission: {inviter.role}")
 
         # Check if email is already an active member
         existing_user = db.query(User).filter(
@@ -84,10 +96,12 @@ class InvitationService:
                 ProjectMember.is_deleted == False
             ).first()
             if existing_member:
+                logger.warning(f"⚠️ User {inv_data.email} is already a member")
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="User is already a member of this project"
                 )
+        logger.info("✅ User is not a member")
 
         # Check for existing pending invitation
         pending_inv = db.query(Invitation).filter(
@@ -96,14 +110,17 @@ class InvitationService:
             Invitation.status == "Pending"
         ).first()
         if pending_inv:
+            logger.warning(f"⚠️ Pending invitation exists for {inv_data.email}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="An invitation is already pending for this email"
             )
+        logger.info("✅ No pending invitations")
 
         # Generate unique token and expiration
         token = str(uuid.uuid4())
         expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+        logger.info(f"✅ Token generated: {token}")
 
         # Create invitation
         new_invitation = Invitation(
@@ -118,18 +135,26 @@ class InvitationService:
         db.add(new_invitation)
         db.commit()
         db.refresh(new_invitation)
+        logger.info(f"✅ Invitation created with ID: {new_invitation.id}")
 
         # Send invitation email
         user = db.query(User).filter(User.id == inviter_id).first()
         inviter_name = user.name if user else "Someone"
 
-        EmailService.send_invitation_email(
+        logger.info(f"📧 [INVITE] Sending email to {inv_data.email}...")
+        email_result = EmailService.send_invitation_email(
             to_email=inv_data.email,
             token=new_invitation.token,
             project_name=project.name,
             inviter_name=inviter_name
         )
 
+        if email_result:
+            logger.info(f"✅ Invitation email sent to {inv_data.email}")
+        else:
+            logger.error(f"❌ Failed to send invitation email to {inv_data.email}")
+
+        logger.info("=" * 60)
         return new_invitation
 
     @staticmethod
@@ -153,8 +178,9 @@ class InvitationService:
             HTTPException 404: Invalid or expired invitation
             HTTPException 400: Email mismatch or invitation expired
         """
-        print(f"🔍 Accepting invitation with token: {token}")
-        print(f"👤 User ID: {user_id}")
+        logger.info("=" * 60)
+        logger.info(f"📨 [ACCEPT] Accepting invitation with token: {token}")
+        logger.info(f"📨 [ACCEPT] User ID: {user_id}")
 
         # Find the invitation
         invitation = db.query(Invitation).filter(
@@ -163,18 +189,19 @@ class InvitationService:
         ).first()
 
         if not invitation:
-            print("❌ Invitation not found or not pending")
+            logger.error("❌ Invitation not found or not pending")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Invalid or expired invitation"
             )
 
-        print(f"✅ Invitation found: {invitation.id}, email: {invitation.email}")
+        logger.info(f"✅ Invitation found: ID={invitation.id}, email={invitation.email}")
 
         # Check expiration
         if invitation.expires_at < datetime.now(timezone.utc):
             invitation.status = "Expired"
             db.commit()
+            logger.error("❌ Invitation has expired")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invitation has expired"
@@ -187,17 +214,17 @@ class InvitationService:
         ).first()
 
         if not user:
-            print(f"❌ User not found: {user_id}")
+            logger.error(f"❌ User not found: {user_id}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
 
-        print(f"✅ User found: {user.id}, email: {user.email}")
+        logger.info(f"✅ User found: {user.id}, email: {user.email}")
 
         # Verify email matches
         if user.email.lower() != invitation.email.lower():
-            print(f"⚠️ Email mismatch: {user.email} vs {invitation.email}")
+            logger.error(f"❌ Email mismatch: {user.email} vs {invitation.email}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email does not match invitation"
@@ -211,7 +238,7 @@ class InvitationService:
         ).first()
 
         if existing_member:
-            print(f"ℹ️ User is already a member: {user_id}")
+            logger.info(f"ℹ️ User is already a member: {user_id}")
             invitation.status = "Accepted"
             db.commit()
             return {
@@ -230,16 +257,15 @@ class InvitationService:
             deleted_member.is_deleted = False
             deleted_member.role = "Member"
             db.add(deleted_member)
-            print(f"✅ Reactivated member: user_id={user_id}, project_id={invitation.project_id}")
+            logger.info(f"✅ Reactivated member: user_id={user_id}")
         else:
-            # Create new membership
             new_member = ProjectMember(
                 project_id=invitation.project_id,
                 user_id=user_id,
                 role="Member"
             )
             db.add(new_member)
-            print(f"✅ Added new member: user_id={user_id}, project_id={invitation.project_id}")
+            logger.info(f"✅ Added new member: user_id={user_id}")
 
         # If invitation is for a specific task, assign it
         if invitation.task_id:
@@ -249,13 +275,14 @@ class InvitationService:
             ).first()
             if task and task.assignee_id is None:
                 task.assignee_id = user_id
-                print(f"✅ Assigned task {task.id} to user {user_id}")
+                logger.info(f"✅ Assigned task {task.id} to user {user_id}")
 
         # Mark invitation as accepted
         invitation.status = "Accepted"
         db.commit()
-        print(f"✅ All changes committed successfully")
+        logger.info(f"✅ Invitation accepted successfully")
 
+        logger.info("=" * 60)
         return {
             "message": "Invitation accepted successfully",
             "project_id": invitation.project_id,
@@ -285,7 +312,6 @@ class InvitationService:
         if not invitation:
             return None
 
-        # Get inviter name
         inviter = db.query(User).filter(User.id == invitation.inviter_id).first()
         project = db.query(Project).filter(Project.id == invitation.project_id).first()
 
