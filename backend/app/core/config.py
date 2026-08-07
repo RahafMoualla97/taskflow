@@ -2,14 +2,11 @@
 Application configuration and settings management.
 """
 import os
-import logging
 from typing import Optional
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
 load_dotenv()
-
-logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -32,7 +29,7 @@ class Settings(BaseSettings):
         os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7")
     )
 
-    # ========== Google OAuth ==========
+    # ========== Google OAuth (Login) ==========
     GOOGLE_CLIENT_ID: Optional[str] = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: Optional[str] = os.getenv("GOOGLE_CLIENT_SECRET", "")
     GOOGLE_REDIRECT_URI: str = os.getenv(
@@ -40,25 +37,14 @@ class Settings(BaseSettings):
         "http://localhost:8000/api/v1/auth/google/callback"
     )
 
+    # ========== Gmail API (Email Sending) ==========
+    GMAIL_REDIRECT_URI: str = os.getenv(
+        "GMAIL_REDIRECT_URI",
+        "http://localhost:8000/oauth2callback"
+    )
+
     # ========== Frontend ==========
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
-
-    # ================================================================
-    # Email Configuration
-    # ================================================================
-
-    # Option 1: Gmail SMTP (Active)
-    EMAIL_HOST: str = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-    EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "587"))
-    EMAIL_USERNAME: str = os.getenv("EMAIL_USERNAME", "")
-    EMAIL_PASSWORD: str = os.getenv("EMAIL_PASSWORD", "")
-    FROM_EMAIL: str = os.getenv("FROM_EMAIL", "rahafmoualla31297@gmail.com")
-
-    # Option 2: Brevo HTTP API (Commented)
-    # BREVO_API_KEY: str = os.getenv("BREVO_API_KEY", "")
-
-    # Option 3: Resend API (Commented)
-    # RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")
 
     # ========== Environment ==========
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
@@ -71,15 +57,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-# ================================================================
-# Log configuration status on startup
-# ================================================================
-logger.info("=" * 60)
-logger.info("⚙️ [CONFIG] Email configuration loaded")
-logger.info(f"⚙️ [CONFIG] EMAIL_HOST: {settings.EMAIL_HOST}")
-logger.info(f"⚙️ [CONFIG] EMAIL_PORT: {settings.EMAIL_PORT}")
-logger.info(f"⚙️ [CONFIG] EMAIL_USERNAME: {settings.EMAIL_USERNAME}")
-logger.info(f"⚙️ [CONFIG] FROM_EMAIL: {settings.FROM_EMAIL}")
-logger.info(f"⚙️ [CONFIG] EMAIL_PASSWORD set: {'Yes' if settings.EMAIL_PASSWORD else 'No'}")
-logger.info("=" * 60)

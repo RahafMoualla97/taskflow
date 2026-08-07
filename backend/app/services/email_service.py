@@ -1,6 +1,6 @@
 """
 Email service for sending notifications via Gmail API.
-Uses OAuth 2.0 authentication instead of SMTP.
+Uses OAuth 2.0 authentication from environment variables.
 """
 import os
 import base64
@@ -35,7 +35,6 @@ class EmailService:
         """
         creds = None
         token_path = 'token.json'
-        creds_path = 'credentials.json'
 
         # Check if token.json exists
         if os.path.exists(token_path):
@@ -46,11 +45,21 @@ class EmailService:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                if not os.path.exists(creds_path):
-                    logger.error("credentials.json not found! Please download from Google Cloud Console.")
-                    return None
+                # Build credentials from environment variables
+                client_config = {
+                    "web": {
+                        "client_id": settings.GOOGLE_CLIENT_ID,
+                        "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                        "token_uri": "https://oauth2.googleapis.com/token",
+                        "redirect_uris": [settings.GMAIL_REDIRECT_URI]
+                    }
+                }
 
-                flow = InstalledAppFlow.from_client_secrets_file(creds_path, SCOPES)
+                flow = InstalledAppFlow.from_client_config(
+                    client_config,
+                    scopes=SCOPES
+                )
                 creds = flow.run_local_server(port=8000)
 
             # Save credentials for next run
