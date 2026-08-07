@@ -42,8 +42,11 @@ class Settings(BaseSettings):
         "GMAIL_REDIRECT_URI",
         "http://localhost:8000/oauth2callback"
     )
-    GOOGLE_SERVICE_ACCOUNT_JSON: str = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", "")  # ✅ أضيفي هذا
-
+    GOOGLE_SERVICE_ACCOUNT_JSON: str = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", "") 
+     
+    # ========== Email Configuration ==========
+    FROM_EMAIL: str = os.getenv("FROM_EMAIL", "")
+    
     # ========== Frontend ==========
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
