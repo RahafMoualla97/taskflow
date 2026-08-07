@@ -39,5 +39,6 @@ htmlcov/
 test_config.py
 
 # Gmail API credentials
+service-account-key.json
 credentials.json
 token.json
