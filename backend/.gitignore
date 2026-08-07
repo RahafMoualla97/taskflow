@@ -37,3 +37,7 @@ htmlcov/
 
 # Test config (temporary)
 test_config.py
+
+# Gmail API credentials
+credentials.json
+token.json

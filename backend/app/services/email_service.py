@@ -1,25 +1,63 @@
 """
-Email service for sending notifications via SMTP.
-
-This service handles:
-- Project invitation emails with accept links
-- Task assignment notifications
-- HTML email templates with styling
+Email service for sending notifications via Gmail API.
+Uses OAuth 2.0 authentication instead of SMTP.
 """
-import smtplib
+import os
+import base64
 import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
 
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+
 from app.core.config import settings
 
-# Configure logger
 logger = logging.getLogger(__name__)
+
+# Gmail API scopes
+SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 
 class EmailService:
-    """Service for sending various types of email notifications."""
+    """Service for sending email notifications using Gmail API."""
+
+    @staticmethod
+    def _get_credentials() -> Optional[Credentials]:
+        """
+        Get OAuth 2.0 credentials for Gmail API.
+
+        Returns:
+            Credentials object if available, None otherwise
+        """
+        creds = None
+        token_path = 'token.json'
+        creds_path = 'credentials.json'
+
+        # Check if token.json exists
+        if os.path.exists(token_path):
+            creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+
+        # If no valid credentials, get new ones
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                if not os.path.exists(creds_path):
+                    logger.error("credentials.json not found! Please download from Google Cloud Console.")
+                    return None
+
+                flow = InstalledAppFlow.from_client_secrets_file(creds_path, SCOPES)
+                creds = flow.run_local_server(port=8000)
+
+            # Save credentials for next run
+            with open(token_path, 'w') as token:
+                token.write(creds.to_json())
+
+        return creds
 
     @staticmethod
     def _send_email(
@@ -29,7 +67,7 @@ class EmailService:
         from_email: Optional[str] = None
     ) -> bool:
         """
-        Internal method to send an email via SMTP.
+        Send an email using Gmail API.
 
         Args:
             to_email: Recipient email address
@@ -41,57 +79,38 @@ class EmailService:
             True if email was sent successfully, False otherwise
         """
         try:
-            logger.info(f"📧 [START] Sending email to {to_email}")
-            logger.info(f"📧 [STEP 1] Subject: {subject}")
-            logger.info(f"📧 [STEP 1] From: {from_email or settings.FROM_EMAIL}")
+            logger.info(f"📧 [GMAIL_API] Attempting to send email to {to_email}")
 
+            # Get credentials
+            creds = EmailService._get_credentials()
+            if not creds:
+                logger.error("❌ Failed to get Gmail API credentials")
+                return False
+
+            # Build Gmail service
+            service = build('gmail', 'v1', credentials=creds)
+
+            # Create email message
             msg = MIMEMultipart('alternative')
-            msg['From'] = f"TaskFlow <{from_email or settings.FROM_EMAIL}>"
             msg['To'] = to_email
             msg['Subject'] = subject
-
             msg.attach(MIMEText(html_content, 'html'))
-            logger.info("📧 [STEP 2] Email message created")
 
-            logger.info(f"📧 [STEP 3] Connecting to {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+            # Encode message
+            raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
 
-            # Connect to SMTP server
-            if settings.EMAIL_PORT == 465:
-                logger.info("📧 [STEP 3] Using SSL connection (port 465)")
-                server = smtplib.SMTP_SSL(settings.EMAIL_HOST, settings.EMAIL_PORT)
-            else:
-                logger.info("📧 [STEP 3] Using STARTTLS connection (port 587)")
-                server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
-                server.starttls()
-
-            logger.info("📧 [STEP 4] Connection established, logging in...")
-            server.login(settings.EMAIL_USERNAME, settings.EMAIL_PASSWORD)
-            logger.info("📧 [STEP 5] Login successful")
-
-            logger.info(f"📧 [STEP 6] Sending email to {to_email}...")
-            server.sendmail(settings.FROM_EMAIL, to_email, msg.as_string())
-            server.quit()
+            # Send email
+            message = service.users().messages().send(
+                userId='me',
+                body={'raw': raw}
+            ).execute()
 
             logger.info(f"✅ Email sent successfully to {to_email}")
+            logger.info(f"✅ Message ID: {message.get('id')}")
             return True
 
-        except smtplib.SMTPAuthenticationError as e:
-            logger.error(f"❌ SMTP Authentication failed: {e}")
-            logger.error("❌ Please check EMAIL_USERNAME and EMAIL_PASSWORD")
-            return False
-
-        except smtplib.SMTPException as e:
-            logger.error(f"❌ SMTP error: {e}")
-            return False
-
-        except ConnectionError as e:
-            logger.error(f"❌ Connection error: {e}")
-            logger.error("❌ Network unreachable - Render may be blocking SMTP ports")
-            logger.error("❌ Try changing EMAIL_PORT to 465 or use a different email service")
-            return False
-
         except Exception as e:
-            logger.error(f"❌ Error sending email to {to_email}: {str(e)}")
+            logger.error(f"❌ Email send failed: {e}")
             return False
 
     @staticmethod
@@ -103,21 +122,7 @@ class EmailService:
     ) -> bool:
         """
         Send a project invitation email.
-
-        Args:
-            to_email: Recipient email address
-            token: Unique invitation token for acceptance
-            project_name: Name of the project being invited to
-            inviter_name: Name of the user who sent the invitation
-
-        Returns:
-            True if email was sent successfully, False otherwise
         """
-        logger.info("=" * 60)
-        logger.info(f"📧 [INVITATION] Sending invitation to {to_email}")
-        logger.info(f"📧 [INVITATION] Project: {project_name}")
-        logger.info(f"📧 [INVITATION] Inviter: {inviter_name}")
-
         accept_url = f"{settings.FRONTEND_URL}/invitations/accept?token={token}"
         subject = f"Invitation to join {project_name} on TaskFlow"
 
@@ -160,15 +165,7 @@ class EmailService:
         </html>
         """
 
-        result = EmailService._send_email(to_email, subject, html_content)
-
-        if result:
-            logger.info(f"✅ Invitation email sent to {to_email}")
-        else:
-            logger.error(f"❌ Failed to send invitation email to {to_email}")
-
-        logger.info("=" * 60)
-        return result
+        return EmailService._send_email(to_email, subject, html_content)
 
     @staticmethod
     def send_task_assignment_email(
@@ -179,21 +176,7 @@ class EmailService:
     ) -> bool:
         """
         Send a task assignment notification email.
-
-        Args:
-            to_email: Recipient email address
-            task_title: Title of the assigned task
-            project_name: Name of the project
-            assigner_name: Name of the user who assigned the task
-
-        Returns:
-            True if email was sent successfully, False otherwise
         """
-        logger.info("=" * 60)
-        logger.info(f"📧 [TASK_ASSIGN] Sending task assignment to {to_email}")
-        logger.info(f"📧 [TASK_ASSIGN] Task: {task_title}")
-        logger.info(f"📧 [TASK_ASSIGN] Project: {project_name}")
-
         subject = f"New task assigned: {task_title}"
         task_url = f"{settings.FRONTEND_URL}/tasks"
 
@@ -235,12 +218,4 @@ class EmailService:
         </html>
         """
 
-        result = EmailService._send_email(to_email, subject, html_content)
-
-        if result:
-            logger.info(f"✅ Task assignment email sent to {to_email}")
-        else:
-            logger.error(f"❌ Failed to send task assignment email to {to_email}")
-
-        logger.info("=" * 60)
-        return result
+        return EmailService._send_email(to_email, subject, html_content)
