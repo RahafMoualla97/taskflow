@@ -1,16 +1,14 @@
 """
-Email service for sending notifications via Gmail API.
+Email service for sending notifications via Gmail API using Service Account.
 """
-import os
+import json
 import base64
 import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
 
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
 from app.core.config import settings
@@ -22,44 +20,23 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 
 class EmailService:
-    """Service for sending email notifications using Gmail API."""
+    """Service for sending email notifications using Gmail API Service Account."""
 
     @staticmethod
-    def _get_credentials() -> Optional[Credentials]:
+    def _get_credentials():
         """
-        Get OAuth 2.0 credentials for Gmail API.
+        Get service account credentials from environment variable.
         """
-        creds = None
-        token_path = 'token.json'
-
-        # Check if token.json exists
-        if os.path.exists(token_path):
-            creds = Credentials.from_authorized_user_file(token_path, SCOPES)
-
-        # If no valid credentials, get new ones
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                # Build credentials from environment variables
-                client_config = {
-                    "web": {
-                        "client_id": settings.GOOGLE_CLIENT_ID,
-                        "client_secret": settings.GOOGLE_CLIENT_SECRET,
-                        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                        "token_uri": "https://oauth2.googleapis.com/token",
-                        "redirect_uris": [settings.GMAIL_REDIRECT_URI]
-                    }
-                }
-
-                flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-                creds = flow.run_local_server(port=8000)
-
-            # Save credentials for next run
-            with open(token_path, 'w') as token:
-                token.write(creds.to_json())
-
-        return creds
+        try:
+            service_account_info = json.loads(settings.GOOGLE_SERVICE_ACCOUNT_JSON)
+            creds = service_account.Credentials.from_service_account_info(
+                service_account_info,
+                scopes=SCOPES
+            )
+            return creds
+        except Exception as e:
+            logger.error(f"❌ Failed to get credentials: {e}")
+            return None
 
     @staticmethod
     def _send_email(
