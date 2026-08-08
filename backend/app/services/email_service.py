@@ -1,17 +1,10 @@
 """
-Email service for sending notifications via SMTP.
-
-This service handles:
-- Project invitation emails with accept links
-- Task assignment notifications
-- HTML email templates with styling
+Email service for sending notifications via SMTP (HARDCODED FOR TESTING).
 """
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
-
-from app.core.config import settings
 
 
 class EmailService:
@@ -25,34 +18,41 @@ class EmailService:
         from_email: Optional[str] = None
     ) -> bool:
         """
-        Internal method to send an email via SMTP.
-
-        Args:
-            to_email: Recipient email address
-            subject: Email subject line
-            html_content: HTML content of the email
-            from_email: Sender email (defaults to settings.FROM_EMAIL)
-
-        Returns:
-            True if email was sent successfully, False otherwise
+        Internal method to send an email via SMTP (HARDCODED).
         """
         try:
-            msg = MIMEMultipart('alternative')
-            msg['From'] = f"TaskFlow <{from_email or settings.FROM_EMAIL}>"
-            msg['To'] = to_email
-            msg['Subject'] = subject
+            # ============================================================
+            # ✅ جميع الإعدادات ثابتة هنا للتجربة
+            # ============================================================
+            EMAIL_HOST = "smtp.gmail.com"
+            EMAIL_PORT = 587
+            EMAIL_USERNAME = "rahafmoualla31297@gmail.com"
+            EMAIL_PASSWORD = "bxye yhke wewu zqrx"
+            FROM_EMAIL = "rahafmoualla31297@gmail.com"
+            TO_EMAIL = "rahafmoualla29@gmail.com"  # ثابت
+            # ============================================================
 
+            print(f"📧 [HARDCODED] Sending to: {TO_EMAIL}")
+            print(f"📧 [HARDCODED] From: {FROM_EMAIL}")
+            print(f"📧 [HARDCODED] Subject: {subject}")
+
+            msg = MIMEMultipart('alternative')
+            msg['From'] = f"TaskFlow <{FROM_EMAIL}>"
+            msg['To'] = TO_EMAIL
+            msg['Subject'] = subject
             msg.attach(MIMEText(html_content, 'html'))
 
-            server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+            server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
             server.starttls()
-            server.login(settings.EMAIL_USERNAME, settings.EMAIL_PASSWORD)
-            server.sendmail(settings.FROM_EMAIL, to_email, msg.as_string())
+            server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
+            server.sendmail(FROM_EMAIL, TO_EMAIL, msg.as_string())
             server.quit()
 
+            print(f"✅✅✅ Email sent to {TO_EMAIL}")
             return True
 
         except Exception as e:
+            print(f"❌ Error: {e}")
             return False
 
     @staticmethod
@@ -63,18 +63,9 @@ class EmailService:
         inviter_name: str
     ) -> bool:
         """
-        Send a project invitation email.
-
-        Args:
-            to_email: Recipient email address
-            token: Unique invitation token for acceptance
-            project_name: Name of the project being invited to
-            inviter_name: Name of the user who sent the invitation
-
-        Returns:
-            True if email was sent successfully, False otherwise
+        Send a project invitation email (HARDCODED).
         """
-        accept_url = f"{settings.FRONTEND_URL}/invitations/accept?token={token}"
+        accept_url = f"https://taskflow-three-flax.vercel.app/invitations/accept?token={token}"
         subject = f"Invitation to join {project_name} on TaskFlow"
 
         html_content = f"""
@@ -127,18 +118,9 @@ class EmailService:
     ) -> bool:
         """
         Send a task assignment notification email.
-
-        Args:
-            to_email: Recipient email address
-            task_title: Title of the assigned task
-            project_name: Name of the project
-            assigner_name: Name of the user who assigned the task
-
-        Returns:
-            True if email was sent successfully, False otherwise
         """
         subject = f"New task assigned: {task_title}"
-        task_url = f"{settings.FRONTEND_URL}/tasks"
+        task_url = f"https://taskflow-three-flax.vercel.app/tasks"
 
         html_content = f"""
         <!DOCTYPE html>
