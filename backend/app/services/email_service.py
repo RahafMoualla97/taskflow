@@ -50,11 +50,9 @@ class EmailService:
             server.sendmail(settings.FROM_EMAIL, to_email, msg.as_string())
             server.quit()
 
-            print(f"✅ Email sent to {to_email}")
             return True
 
         except Exception as e:
-            print(f"❌ Error sending email to {to_email}: {str(e)}")
             return False
 
     @staticmethod
