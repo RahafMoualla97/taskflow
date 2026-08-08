@@ -37,16 +37,13 @@ class Settings(BaseSettings):
         "http://localhost:8000/api/v1/auth/google/callback"
     )
 
-    # ========== Gmail API (Email Sending) ==========
-    GMAIL_REDIRECT_URI: str = os.getenv(
-        "GMAIL_REDIRECT_URI",
-        "http://localhost:8000/oauth2callback"
-    )
-    GOOGLE_SERVICE_ACCOUNT_JSON: str = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", "") 
-     
     # ========== Email Configuration ==========
-    FROM_EMAIL: str = os.getenv("FROM_EMAIL", "")
-    
+    EMAIL_HOST: str = os.getenv("EMAIL_HOST", "sandbox.smtp.mailtrap.io")
+    EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "587"))
+    EMAIL_USERNAME: str = os.getenv("EMAIL_USERNAME", "")
+    EMAIL_PASSWORD: str = os.getenv("EMAIL_PASSWORD", "")
+    FROM_EMAIL: str = os.getenv("FROM_EMAIL", "test@example.com")
+
     # ========== Frontend ==========
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 

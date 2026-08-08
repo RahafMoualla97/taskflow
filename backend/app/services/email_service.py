@@ -1,42 +1,19 @@
 """
-Email service for sending notifications via Gmail API using Service Account.
+Email service for sending notifications via SMTP.
 """
-import json
-import base64
+import smtplib
 import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
 
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Gmail API scopes
-SCOPES = ['https://www.googleapis.com/auth/gmail.send']
-
 
 class EmailService:
-    """Service for sending email notifications using Gmail API Service Account."""
-
-    @staticmethod
-    def _get_credentials():
-        """
-        Get service account credentials from environment variable.
-        """
-        try:
-            service_account_info = json.loads(settings.GOOGLE_SERVICE_ACCOUNT_JSON)
-            creds = service_account.Credentials.from_service_account_info(
-                service_account_info,
-                scopes=SCOPES
-            )
-            return creds
-        except Exception as e:
-            logger.error(f"❌ Failed to get credentials: {e}")
-            return None
+    """Service for sending email notifications using SMTP."""
 
     @staticmethod
     def _send_email(
@@ -46,38 +23,24 @@ class EmailService:
         from_email: Optional[str] = None
     ) -> bool:
         """
-        Send an email using Gmail API.
+        Send an email via SMTP.
         """
         try:
-            logger.info(f"📧 [GMAIL_API] Attempting to send email to {to_email}")
+            logger.info(f"📧 [SMTP] Attempting to send email to {to_email}")
 
-            # Get credentials
-            creds = EmailService._get_credentials()
-            if not creds:
-                logger.error("❌ Failed to get Gmail API credentials")
-                return False
-
-            # Build Gmail service
-            service = build('gmail', 'v1', credentials=creds)
-
-            # Create email message
             msg = MIMEMultipart('alternative')
-            msg['From'] = from_email or settings.FROM_EMAIL
+            msg['From'] = f"TaskFlow <{from_email or settings.FROM_EMAIL}>"
             msg['To'] = to_email
             msg['Subject'] = subject
             msg.attach(MIMEText(html_content, 'html'))
 
-            # Encode message
-            raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
-
-            # Send email
-            message = service.users().messages().send(
-                userId='me',
-                body={'raw': raw}
-            ).execute()
+            server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+            server.starttls()
+            server.login(settings.EMAIL_USERNAME, settings.EMAIL_PASSWORD)
+            server.sendmail(settings.FROM_EMAIL, to_email, msg.as_string())
+            server.quit()
 
             logger.info(f"✅ Email sent successfully to {to_email}")
-            logger.info(f"✅ Message ID: {message.get('id')}")
             return True
 
         except Exception as e:
