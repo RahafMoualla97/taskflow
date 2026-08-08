@@ -1,14 +1,17 @@
 """
-Email service for sending notifications via SMTP (HARDCODED FOR TESTING).
+Email service for sending notifications via Maileroo HTTP API.
 """
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import requests
+import logging
 from typing import Optional
+
+from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class EmailService:
-    """Service for sending various types of email notifications."""
+    """Service for sending email notifications using Maileroo HTTP API."""
 
     @staticmethod
     def _send_email(
@@ -18,41 +21,49 @@ class EmailService:
         from_email: Optional[str] = None
     ) -> bool:
         """
-        Internal method to send an email via SMTP (HARDCODED).
+        Send an email via Maileroo HTTP API.
         """
         try:
-            # ============================================================
-            # ✅ جميع الإعدادات ثابتة هنا للتجربة
-            # ============================================================
-            EMAIL_HOST = "smtp.gmail.com"
-            EMAIL_PORT = 587
-            EMAIL_USERNAME = "rahafmoualla31297@gmail.com"
-            EMAIL_PASSWORD = "bxye yhke wewu zqrx"
-            FROM_EMAIL = "rahafmoualla31297@gmail.com"
-            TO_EMAIL = "rahafmoualla29@gmail.com"  # ثابت
-            # ============================================================
+            logger.info(f"📧 [MAILEROO_API] Attempting to send email to {to_email}")
 
-            print(f"📧 [HARDCODED] Sending to: {TO_EMAIL}")
-            print(f"📧 [HARDCODED] From: {FROM_EMAIL}")
-            print(f"📧 [HARDCODED] Subject: {subject}")
+            if not settings.MAILEROO_API_KEY:
+                logger.error("❌ MAILEROO_API_KEY is not set")
+                return False
 
-            msg = MIMEMultipart('alternative')
-            msg['From'] = f"TaskFlow <{FROM_EMAIL}>"
-            msg['To'] = TO_EMAIL
-            msg['Subject'] = subject
-            msg.attach(MIMEText(html_content, 'html'))
+            API_URL = "https://smtp.maileroo.com/api/v2/emails"
+            FROM_EMAIL = from_email or settings.FROM_EMAIL
 
-            server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
-            server.starttls()
-            server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
-            server.sendmail(FROM_EMAIL, TO_EMAIL, msg.as_string())
-            server.quit()
+            payload = {
+                "from": {
+                    "address": FROM_EMAIL,
+                    "display_name": "TaskFlow"
+                },
+                "to": [
+                    {
+                        "address": to_email,
+                        "display_name": "User"
+                    }
+                ],
+                "subject": subject,
+                "html": html_content
+            }
 
-            print(f"✅✅✅ Email sent to {TO_EMAIL}")
-            return True
+            headers = {
+                "Authorization": f"Bearer {settings.MAILEROO_API_KEY}",
+                "Content-Type": "application/json"
+            }
+
+            response = requests.post(API_URL, json=payload, headers=headers, timeout=30)
+
+            if response.status_code in [200, 201]:
+                logger.info(f"✅ Email sent successfully to {to_email}")
+                return True
+            else:
+                logger.error(f"❌ Failed to send email: {response.text}")
+                return False
 
         except Exception as e:
-            print(f"❌ Error: {e}")
+            logger.error(f"❌ Email send failed: {e}")
             return False
 
     @staticmethod
@@ -63,9 +74,9 @@ class EmailService:
         inviter_name: str
     ) -> bool:
         """
-        Send a project invitation email (HARDCODED).
+        Send a project invitation email.
         """
-        accept_url = f"https://taskflow-three-flax.vercel.app/invitations/accept?token={token}"
+        accept_url = f"{settings.FRONTEND_URL}/invitations/accept?token={token}"
         subject = f"Invitation to join {project_name} on TaskFlow"
 
         html_content = f"""
@@ -120,7 +131,7 @@ class EmailService:
         Send a task assignment notification email.
         """
         subject = f"New task assigned: {task_title}"
-        task_url = f"https://taskflow-three-flax.vercel.app/tasks"
+        task_url = f"{settings.FRONTEND_URL}/tasks"
 
         html_content = f"""
         <!DOCTYPE html>

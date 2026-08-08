@@ -40,12 +40,9 @@ class Settings(BaseSettings):
     # ========== Frontend ==========
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
-    # ========== Email (SMTP) ==========
-    EMAIL_HOST: str = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-    EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "587"))
-    EMAIL_USERNAME: str = os.getenv("EMAIL_USERNAME", "")
-    EMAIL_PASSWORD: str = os.getenv("EMAIL_PASSWORD", "")
-    FROM_EMAIL: str = os.getenv("FROM_EMAIL", "noreply@taskflow.com")
+    # ========== Maileroo HTTP API ==========
+    MAILEROO_API_KEY: str = os.getenv("MAILEROO_API_KEY", "")
+    FROM_EMAIL: str = os.getenv("FROM_EMAIL", "rahafmoualla31297@60e4162f569905c4.maileroo.org")
 
     # ========== Environment ==========
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
