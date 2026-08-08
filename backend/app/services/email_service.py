@@ -1,19 +1,21 @@
 """
 Email service for sending notifications via SMTP.
+
+This service handles:
+- Project invitation emails with accept links
+- Task assignment notifications
+- HTML email templates with styling
 """
 import smtplib
-import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
 
 from app.core.config import settings
 
-logger = logging.getLogger(__name__)
-
 
 class EmailService:
-    """Service for sending email notifications using SMTP."""
+    """Service for sending various types of email notifications."""
 
     @staticmethod
     def _send_email(
@@ -23,15 +25,23 @@ class EmailService:
         from_email: Optional[str] = None
     ) -> bool:
         """
-        Send an email via SMTP.
+        Internal method to send an email via SMTP.
+
+        Args:
+            to_email: Recipient email address
+            subject: Email subject line
+            html_content: HTML content of the email
+            from_email: Sender email (defaults to settings.FROM_EMAIL)
+
+        Returns:
+            True if email was sent successfully, False otherwise
         """
         try:
-            logger.info(f"📧 [SMTP] Attempting to send email to {to_email}")
-
             msg = MIMEMultipart('alternative')
             msg['From'] = f"TaskFlow <{from_email or settings.FROM_EMAIL}>"
             msg['To'] = to_email
             msg['Subject'] = subject
+
             msg.attach(MIMEText(html_content, 'html'))
 
             server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
@@ -40,11 +50,11 @@ class EmailService:
             server.sendmail(settings.FROM_EMAIL, to_email, msg.as_string())
             server.quit()
 
-            logger.info(f"✅ Email sent successfully to {to_email}")
+            print(f"✅ Email sent to {to_email}")
             return True
 
         except Exception as e:
-            logger.error(f"❌ Email send failed: {e}")
+            print(f"❌ Error sending email to {to_email}: {str(e)}")
             return False
 
     @staticmethod
@@ -56,6 +66,15 @@ class EmailService:
     ) -> bool:
         """
         Send a project invitation email.
+
+        Args:
+            to_email: Recipient email address
+            token: Unique invitation token for acceptance
+            project_name: Name of the project being invited to
+            inviter_name: Name of the user who sent the invitation
+
+        Returns:
+            True if email was sent successfully, False otherwise
         """
         accept_url = f"{settings.FRONTEND_URL}/invitations/accept?token={token}"
         subject = f"Invitation to join {project_name} on TaskFlow"
@@ -110,6 +129,15 @@ class EmailService:
     ) -> bool:
         """
         Send a task assignment notification email.
+
+        Args:
+            to_email: Recipient email address
+            task_title: Title of the assigned task
+            project_name: Name of the project
+            assigner_name: Name of the user who assigned the task
+
+        Returns:
+            True if email was sent successfully, False otherwise
         """
         subject = f"New task assigned: {task_title}"
         task_url = f"{settings.FRONTEND_URL}/tasks"

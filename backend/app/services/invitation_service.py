@@ -11,7 +11,6 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta, timezone
 import uuid
-import logging
 from typing import Optional
 
 from app.core.config import settings
@@ -22,8 +21,6 @@ from app.models.user import User
 from app.models.task import Task
 from app.schemas.invitation import InvitationCreate
 from app.services.email_service import EmailService
-
-logger = logging.getLogger(__name__)
 
 
 class InvitationService:

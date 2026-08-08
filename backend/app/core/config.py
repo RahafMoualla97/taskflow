@@ -29,7 +29,7 @@ class Settings(BaseSettings):
         os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7")
     )
 
-    # ========== Google OAuth (Login) ==========
+    # ========== Google OAuth ==========
     GOOGLE_CLIENT_ID: Optional[str] = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: Optional[str] = os.getenv("GOOGLE_CLIENT_SECRET", "")
     GOOGLE_REDIRECT_URI: str = os.getenv(
@@ -37,15 +37,15 @@ class Settings(BaseSettings):
         "http://localhost:8000/api/v1/auth/google/callback"
     )
 
-    # ========== Email Configuration ==========
-    EMAIL_HOST: str = os.getenv("EMAIL_HOST", "sandbox.smtp.mailtrap.io")
+    # ========== Frontend ==========
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
+    # ========== Email (SMTP) ==========
+    EMAIL_HOST: str = os.getenv("EMAIL_HOST", "smtp.gmail.com")
     EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "587"))
     EMAIL_USERNAME: str = os.getenv("EMAIL_USERNAME", "")
     EMAIL_PASSWORD: str = os.getenv("EMAIL_PASSWORD", "")
-    FROM_EMAIL: str = os.getenv("FROM_EMAIL", "test@example.com")
-
-    # ========== Frontend ==========
-    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    FROM_EMAIL: str = os.getenv("FROM_EMAIL", "noreply@taskflow.com")
 
     # ========== Environment ==========
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
