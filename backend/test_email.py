@@ -1,53 +1,70 @@
 """
-Simple script to test Maileroo SMTP connection.
+Simple script to test Maileroo HTTP API connection (Render-compatible).
 """
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import os
+import requests
+from dotenv import load_dotenv
+
+# تحميل ملف الـ .env محلياً أثناء التطوير
+load_dotenv()
 
 def test_email():
-    # ===== بيانات Maileroo الثابتة =====
-    EMAIL_HOST = "smtp.maileroo.com"
-    EMAIL_PORT = 587
-    EMAIL_USERNAME = "rahafmoualla31297@60e4162f569905c4.maileroo.org"
-    EMAIL_PASSWORD = "a392a38cd110509ce8dff7a4"
+    # سحب المفتاح بأمان من متغيرات البيئة، وفي حال عدم وجوده يستخدم المفتاح الافتراضي الخاص بكِ
+    API_KEY = os.getenv("MAILEROO_API_KEY", "68456344f7cdbe68bcbb5c60f1711ae6bb2fe55d29db722ed7f3aa7356668823")
+    
+    # الرابط الصحيح لإرسال الطلبات لـ Maileroo API v2
+    API_URL = "https://smtp.maileroo.com/api/v2/emails"
+    
     FROM_EMAIL = "rahafmoualla31297@60e4162f569905c4.maileroo.org"
     TO_EMAIL = "rahafmoualla29@gmail.com"
-    # ===================================
 
-    print("📧 Testing Maileroo SMTP...")
-    
-    msg = MIMEMultipart('alternative')
-    msg['From'] = f"TaskFlow Test <{FROM_EMAIL}>"
-    msg['To'] = TO_EMAIL
-    msg['Subject'] = "✅ Test Email from Maileroo"
+    print("📧 Testing Maileroo HTTP API...")
 
     html_content = """
     <html>
     <body>
-        <h2 style="color: #4a90e2;">✅ Maileroo Test Successful!</h2>
-        <p>This email was sent via Maileroo SMTP from Render.</p>
-        <p><strong>Time:</strong> Now</p>
+        <h2 style="color: #4a90e2;">✅ Maileroo API Test Successful!</h2>
+        <p>This email was sent via Maileroo HTTP API from Render Free Tier.</p>
         <hr>
         <p style="color: #888; font-size: 12px;">TaskFlow Application</p>
     </body>
     </html>
     """
-    msg.attach(MIMEText(html_content, 'html'))
+
+    payload = {
+        "from": {
+            "address": FROM_EMAIL,
+            "display_name": "TaskFlow Test"
+        },
+        "to": [
+            {
+                "address": TO_EMAIL,
+                "display_name": "Rahaf"
+            }
+        ],
+        "subject": "✅ Test Email from Maileroo API",
+        "html": html_content
+    }
+
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
 
     try:
-        print(f"📧 Connecting to {EMAIL_HOST}:{EMAIL_PORT}...")
-        server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
-        server.starttls()
-        print("🔐 Logging in...")
-        server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
-        print("📤 Sending email...")
-        server.sendmail(FROM_EMAIL, TO_EMAIL, msg.as_string())
-        server.quit()
-        print("✅ Email sent successfully!")
-        return {"status": "success", "message": f"Email sent to {TO_EMAIL}"}
+        print("📧 Connecting via HTTP API to Maileroo...")
+        response = requests.post(API_URL, json=payload, headers=headers)
+        
+        # تم تصحيح الفحص هنا ليدعم حالات النجاح 200 و 201
+        if response.status_code in [200, 201]:
+            print("✅ Email sent successfully via API!")
+            return {"status": "success", "message": f"Email sent to {TO_EMAIL}"}
+        else:
+            print(f"❌ API Error ({response.status_code}): {response.text}")
+            return {"status": "error", "message": response.text}
+            
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Connection Error: {e}")
         return {"status": "error", "message": str(e)}
 
 if __name__ == "__main__":

@@ -1,25 +1,21 @@
 from fastapi import APIRouter, Depends
 from app.core.dependencies import get_current_active_user
 from app.models.user import User
-import subprocess
-import sys
-import os
+
+# استيراد دالة الفحص مباشرة من الملف الفرعي الخاص بكِ
+from test_email import test_email
 
 router = APIRouter(prefix="/test", tags=["Test"])
 
 @router.get("/email")
 def test_email_endpoint(current_user: User = Depends(get_current_active_user)):
     """
-    Test email connection using Maileroo SMTP.
+    Test email connection using Maileroo HTTP API (Direct Call).
     """
-    script_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "test_email.py")
-    result = subprocess.run(
-        [sys.executable, script_path],
-        capture_output=True,
-        text=True
-    )
+    # استدعاء الدالة مباشرة بشكل سريع ونظيف بدون subprocess
+    result = test_email()
+    
     return {
         "status": "ok",
-        "stdout": result.stdout,
-        "stderr": result.stderr
+        "result": result
     }
