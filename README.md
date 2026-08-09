@@ -664,11 +664,6 @@ This project is licensed under the MIT License.
 - Render — Backend hosting
 - Neon — PostgreSQL hosting
 
----
-
-## ⭐ Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=RahafMoualla97/taskflow&type=Date)](https://star-history.com/#RahafMoualla97/taskflow&Date)
 
 ---
 
