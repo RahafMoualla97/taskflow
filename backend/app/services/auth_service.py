@@ -9,7 +9,7 @@ from fastapi import HTTPException, status
 from datetime import timedelta
 
 from app.models.user import User
-from app.schemas.auth import UserCreate
+from app.schemas.user import UserCreate
 from app.core.security import (
     get_password_hash,
     verify_password,
@@ -216,3 +216,50 @@ class AuthService:
         return create_access_token(
             data={"sub": user.email, "user_id": user.id}
         )
+
+    @staticmethod
+    def change_password(
+        db: Session,
+        user_id: int,
+        current_password: str,
+        new_password: str
+    ) -> dict:
+        """
+        Change user password with verification.
+
+        Args:
+            db: Database session
+            user_id: ID of the user
+            current_password: Current password
+            new_password: New password
+
+        Returns:
+            Success message
+
+        Raises:
+            HTTPException 401: Current password is incorrect
+            HTTPException 400: New password is same as current
+        """
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+
+        if not verify_password(current_password, user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Current password is incorrect"
+            )
+
+        if verify_password(new_password, user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New password must be different from current password"
+            )
+
+        user.hashed_password = get_password_hash(new_password)
+        db.commit()
+
+        return {"message": "Password changed successfully"}

@@ -1,4 +1,5 @@
-from app.schemas.auth import UserCreate, UserOut, Token
+from app.schemas.auth import Token, TokenData
+from app.schemas.user import UserCreate, UserOut, UserUpdate, ChangePassword
 from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectOut, ProjectDetail
 from app.schemas.task import TaskCreate, TaskUpdate, TaskStatusUpdate, TaskOut
 from app.schemas.member import MemberAdd, MemberUpdate, MemberOut
@@ -13,7 +14,8 @@ from app.schemas.password_reset import (
 )
 
 __all__ = [
-    "UserCreate", "UserOut", "Token",
+    "Token", "TokenData",
+    "UserCreate", "UserOut", "UserUpdate", "ChangePassword",
     "ProjectCreate", "ProjectUpdate", "ProjectOut", "ProjectDetail",
     "TaskCreate", "TaskUpdate", "TaskStatusUpdate", "TaskOut",
     "MemberAdd", "MemberUpdate", "MemberOut",

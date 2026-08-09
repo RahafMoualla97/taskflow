@@ -1,64 +1,12 @@
 """
-Authentication and user Pydantic schemas.
+Authentication Pydantic schemas.
 
 Defines request/response schemas for:
-- User registration and login
-- User profile responses
 - JWT token responses
+- Token data
 """
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, Field
 from typing import Optional
-from datetime import datetime
-import re
-
-
-class UserCreate(BaseModel):
-    """
-    Schema for user registration request.
-
-    Attributes:
-        email: Valid email address
-        name: Full name (2-100 characters, letters, numbers, spaces, hyphens, dots)
-        password: Password (minimum 6 characters)
-    """
-    email: EmailStr = Field(..., description="User's email address")
-    name: str = Field(..., min_length=2, max_length=100, description="Full name")
-    password: str = Field(..., min_length=6, description="Password (minimum 6 characters)")
-
-    @validator('password')
-    def validate_password(cls, v: str) -> str:
-        """Validate password strength."""
-        if len(v) < 6:
-            raise ValueError('Password must be at least 6 characters long')
-        return v
-
-    @validator('name')
-    def validate_name(cls, v: str) -> str:
-        """Validate name format."""
-        if not re.match(r'^[a-zA-Z0-9\s\-\.]+$', v):
-            raise ValueError('Name can only contain letters, numbers, spaces, hyphens, and dots')
-        return v
-
-
-class UserOut(BaseModel):
-    """
-    Schema for user response (excludes sensitive data like password).
-
-    Attributes:
-        id: User ID
-        email: User's email address
-        name: User's full name
-        avatar_url: Optional profile picture URL
-        created_at: Account creation timestamp
-    """
-    id: int
-    email: EmailStr
-    name: str
-    avatar_url: Optional[str] = None
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class Token(BaseModel):

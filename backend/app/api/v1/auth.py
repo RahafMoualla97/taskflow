@@ -1,6 +1,7 @@
 """
 Authentication API endpoints.
-Handles user registration, login (email/password and Google OAuth), and user profile management.
+Handles user registration, login (email/password and Google OAuth), 
+user profile management, and password change.
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
 from fastapi.security import OAuth2PasswordRequestForm
@@ -13,8 +14,9 @@ import urllib.parse
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, get_current_active_user
 from app.core.config import settings
-from app.schemas.auth import UserCreate, UserOut, Token
-from app.schemas.user import UserUpdate
+from app.core.security import verify_password, get_password_hash
+from app.schemas.auth import Token, TokenData
+from app.schemas.user import UserCreate, UserOut, UserUpdate, ChangePassword
 from app.services.auth_service import AuthService
 from app.models.user import User
 
@@ -30,14 +32,14 @@ def register_user(
     Register a new user account.
     
     Args:
-        user_data: User registration data (email, name, password)
+        user_data: User registration data (email, name, password, confirm_password)
         db: Database session
     
     Returns:
         The newly created user object (without password)
     
     Raises:
-        HTTPException 400: Email already registered
+        HTTPException 400: Email already registered or password validation failed
     """
     return AuthService.register_user(db, user_data)
 
@@ -187,7 +189,7 @@ def update_current_user(
     Update the current user's profile.
     
     Args:
-        user_data: Updated user data (name, avatar_url)
+        user_data: Updated user data (name, avatar_url, email)
         current_user: Authenticated user object
         db: Database session
     
@@ -198,7 +200,62 @@ def update_current_user(
         current_user.name = user_data.name
     if user_data.avatar_url is not None:
         current_user.avatar_url = user_data.avatar_url
+    if user_data.email is not None:
+        # Check if email is already used by another user
+        existing_user = db.query(User).filter(
+            User.email == user_data.email,
+            User.id != current_user.id,
+            User.is_deleted == False
+        ).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already in use"
+            )
+        current_user.email = user_data.email
 
     db.commit()
     db.refresh(current_user)
     return current_user
+
+
+@router.post("/change-password")
+def change_password(
+    data: ChangePassword,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Change user password with current password verification.
+    
+    Args:
+        data: ChangePassword schema with current and new passwords
+        current_user: Authenticated user
+        db: Database session
+    
+    Returns:
+        Success message
+    
+    Raises:
+        HTTPException 401: Current password is incorrect
+        HTTPException 400: New password is same as current or validation failed
+    """
+    # 1. Verify current password
+    if not verify_password(data.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Current password is incorrect"
+        )
+    
+    # 2. Check if new password is different from current
+    if verify_password(data.new_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be different from current password"
+        )
+    
+    # 3. Update password
+    current_user.hashed_password = get_password_hash(data.new_password)
+    db.commit()
+    
+    return {"message": "Password changed successfully"}
