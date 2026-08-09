@@ -7,6 +7,8 @@ from app.services.email_service import EmailService
 from app.services.activity_service import ActivityService
 from app.services.dashboard_service import DashboardService
 from app.services.timesheet_service import TimesheetService
+from app.services.password_reset_service import PasswordResetService
+
 
 __all__ = [
     "AuthService",
@@ -18,4 +20,5 @@ __all__ = [
     "ActivityService",
     "DashboardService",
     "TimesheetService",
+    "PasswordResetService"
 ]

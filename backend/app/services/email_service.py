@@ -199,3 +199,70 @@ class EmailService:
         """
 
         return EmailService._send_email(to_email, subject, html_content)
+    
+    @staticmethod
+    def send_password_reset_email(
+        to_email: str,
+        user_name: str,
+        reset_url: str
+    ) -> bool:
+        """
+        Send a password reset email.
+
+        Args:
+            to_email: Recipient email address
+            user_name: User's name
+            reset_url: Password reset URL with token
+
+        Returns:
+            True if successful, False otherwise
+        """
+        subject = "Reset Your Password - TaskFlow"
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #fff; }}
+                .header {{ background-color: #f39c12; color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }}
+                .content {{ padding: 20px; }}
+                .button {{ display: inline-block; background-color: #f39c12; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
+                .footer {{ text-align: center; padding: 20px; font-size: 12px; color: #777; border-top: 1px solid #ddd; }}
+                .warning {{ background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 15px 0; border-radius: 4px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h2 style="margin: 0;">🔐 Reset Your Password</h2>
+                </div>
+                <div class="content">
+                    <h3>Hello {user_name}!</h3>
+                    <p>We received a request to reset your password for your TaskFlow account.</p>
+                    <p>Click the button below to create a new password:</p>
+                    <div style="text-align: center;">
+                        <a href="{reset_url}" class="button" style="color: white;">Reset Password</a>
+                    </div>
+                    <div class="warning">
+                        <p style="margin: 0; font-size: 14px;">
+                            <strong>⚠️ This link will expire in 1 hour.</strong>
+                        </p>
+                    </div>
+                    <p>If you didn't request this, please ignore this email or contact support.</p>
+                    <p style="font-size: 12px; color: #999;">
+                        For security reasons, this link can only be used once.
+                    </p>
+                </div>
+                <div class="footer">
+                    <p>This email was sent by TaskFlow. Please do not reply to this email.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        return EmailService._send_email(to_email, subject, html_content)

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, projects, members, tasks, comments, invitations, notifications, activities, dashboard, users, timesheet
+from app.api.v1 import auth, projects, members, tasks, comments, invitations, notifications, activities, dashboard, users, timesheet, password_reset
 
 router = APIRouter()
 router.include_router(auth.router)
@@ -13,3 +13,4 @@ router.include_router(activities.router)
 router.include_router(dashboard.router)
 router.include_router(users.router)
 router.include_router(timesheet.router)
+router.include_router(password_reset.router)

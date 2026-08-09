@@ -16,6 +16,8 @@ import NotificationsPage from './pages/NotificationsPage';
 import TimesheetReport from './pages/TimesheetReport';
 import MembersManagement from './pages/MembersManagement';
 import { Toaster } from 'react-hot-toast';
+import ResetPassword from './pages/ResetPassword';
+import ForgotPassword from './pages/ForgotPassword';
 
 /**
  * Private route wrapper that redirects unauthenticated users to login
@@ -43,8 +45,11 @@ function App() {
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/invitations/accept" element={<InvitationAccept />} />
+            
             
             {/* Protected Routes - Dashboard */}
             <Route path="/" element={

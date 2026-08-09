@@ -6,6 +6,11 @@ from app.schemas.comment import CommentCreate, CommentUpdate, CommentOut
 from app.schemas.invitation import InvitationCreate, InvitationAccept, InvitationOut
 from app.schemas.notification import NotificationOut, NotificationUpdate
 from app.schemas.timesheet import TimesheetCreate, TimesheetUpdate, TimesheetOut
+from app.schemas.password_reset import (
+    PasswordResetRequest,
+    PasswordResetVerify,
+    PasswordResetResponse,
+)
 
 __all__ = [
     "UserCreate", "UserOut", "Token",
@@ -16,4 +21,5 @@ __all__ = [
     "InvitationCreate", "InvitationAccept", "InvitationOut",
     "NotificationOut", "NotificationUpdate",
     "TimesheetCreate", "TimesheetUpdate", "TimesheetOut",
+    "PasswordResetRequest", "PasswordResetVerify", "PasswordResetResponse",
 ]
