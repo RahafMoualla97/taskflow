@@ -44,7 +44,7 @@ const MembersList = ({ projectId }: { projectId: number }) => {
     setIsSending(true);
 
     try {
-      const response = await apiClient.post('/invitations/', {
+      await apiClient.post('/invitations/', {
         email: inviteEmail,
         project_id: projectId,
         role: inviteRole,
