@@ -58,8 +58,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.location.href = `${apiUrl}/auth/google`;
   };
 
+  const updateUser = async (data: { name?: string; avatar_url?: string }) => {
+    try {
+      const response = await apiClient.put('/auth/users/me', {
+        name: data.name,
+        avatar_url: data.avatar_url
+      });
+      setUser(response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Update user error:', error);
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, googleLogin }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token, 
+      loading, 
+      login, 
+      logout, 
+      googleLogin,
+      updateUser
+    }}>
       {children}
     </AuthContext.Provider>
   );

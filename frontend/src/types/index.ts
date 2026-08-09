@@ -40,6 +40,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<any>;
   logout: () => void;
   googleLogin: () => void;
+  updateUser: (data: { name?: string; avatar_url?: string }) => Promise<User>;
 }
 
 export interface Collaborator {

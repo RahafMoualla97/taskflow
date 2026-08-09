@@ -89,7 +89,7 @@ const Layout = ({ children }: LayoutProps) => {
                 className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <img
-                  src={user?.avatar_url || 'https://ui-avatars.com/api/?name=' + user?.name}
+                  src={user?.avatar_url || `https://ui-avatars.com/api/?name=${user?.name}&background=4a90e2&color=fff`}
                   alt={user?.name}
                   className="w-8 h-8 rounded-full"
                 />
