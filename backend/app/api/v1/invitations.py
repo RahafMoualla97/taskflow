@@ -1,10 +1,7 @@
 """
 Invitation API endpoints.
-
-This module handles project invitations including:
-- Creating and sending invitations via email
-- Accepting invitations
-- Checking invitation validity
+Handles project invitations including creating and sending invitations via email,
+accepting invitations, and checking invitation validity.
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
@@ -26,18 +23,18 @@ def create_invitation(
 ):
     """
     Create and send a project invitation.
-
+    
     Only project Admins and Owners can send invitations.
-    The invitation will be sent via email with a unique token.
-
+    The invitation is sent via email with a unique token.
+    
     Args:
         inv_data: Invitation data (email, project_id, role)
-        current_user: Authenticated user (must be Admin or Owner)
+        current_user: The authenticated user (must be Admin or Owner)
         db: Database session
-
+    
     Returns:
         The created Invitation object
-
+    
     Raises:
         HTTPException 403: User lacks permission
         HTTPException 400: Email is already a member or invitation pending
@@ -54,18 +51,18 @@ def accept_invitation(
 ):
     """
     Accept an invitation using the provided token.
-
+    
     The user must be authenticated and their email must match
     the email the invitation was sent to.
-
+    
     Args:
         token: Unique invitation token
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         Success message with project_id
-
+    
     Raises:
         HTTPException 404: Invalid or expired invitation
         HTTPException 400: Email mismatch or invitation expired
@@ -81,17 +78,16 @@ def check_invitation(
 ):
     """
     Validate an invitation token without requiring authentication.
-
-    This endpoint is used to check if an invitation is valid
-    before the user logs in or creates an account.
-
+    
+    Used to check if an invitation is valid before the user logs in or creates an account.
+    
     Args:
         token: Unique invitation token
         db: Database session
-
+    
     Returns:
         Invitation details if valid (email, project_id, project_name, etc.)
-
+    
     Raises:
         HTTPException 404: Invalid or expired invitation
     """

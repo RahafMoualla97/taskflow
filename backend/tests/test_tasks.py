@@ -1,5 +1,8 @@
 """
 Tests for task endpoints.
+
+Covers CRUD operations, status transitions, search,
+and collaborator/watcher management.
 """
 from fastapi import status
 from app.models.task import Task
@@ -29,7 +32,7 @@ def test_create_task(client, db_session, auth_headers, test_user, test_project):
 
 
 def test_get_project_tasks(client, db_session, auth_headers, test_user, test_project, test_task):
-    """Test getting tasks for a project."""
+    """Test retrieving all tasks for a project."""
     response = client.get(
         f"/api/v1/tasks/project/{test_project.id}",
         headers=auth_headers
@@ -42,7 +45,7 @@ def test_get_project_tasks(client, db_session, auth_headers, test_user, test_pro
 
 
 def test_get_project_tasks_with_status_filter(client, db_session, auth_headers, test_user, test_project, test_task):
-    """Test getting tasks filtered by status."""
+    """Test retrieving tasks filtered by status."""
     response = client.get(
         f"/api/v1/tasks/project/{test_project.id}?status=ToDo",
         headers=auth_headers
@@ -54,7 +57,7 @@ def test_get_project_tasks_with_status_filter(client, db_session, auth_headers, 
 
 
 def test_get_task_by_id(client, db_session, auth_headers, test_user, test_task):
-    """Test getting a specific task by ID."""
+    """Test retrieving a specific task by ID."""
     response = client.get(
         f"/api/v1/tasks/{test_task.id}",
         headers=auth_headers
@@ -98,7 +101,6 @@ def test_update_task_status(client, db_session, auth_headers, test_user, test_ta
 
 def test_update_task_status_invalid_transition(client, db_session, auth_headers, test_user, test_task):
     """Test invalid status transition (ToDo -> Done)."""
-    # First set to ToDo (default)
     response = client.patch(
         f"/api/v1/tasks/{test_task.id}/status",
         json={"status": "Done"},
@@ -118,13 +120,12 @@ def test_delete_task(client, db_session, auth_headers, test_user, test_task):
     
     assert response.status_code == status.HTTP_204_NO_CONTENT
     
-    # Verify task is soft deleted
     task = db_session.query(Task).filter(Task.id == test_task.id).first()
     assert task.is_deleted == True
 
 
 def test_search_tasks(client, db_session, auth_headers, test_user, test_project, test_task):
-    """Test searching for tasks."""
+    """Test searching for tasks by title or description."""
     response = client.get(
         f"/api/v1/tasks/search?q=Test&project_id={test_project.id}",
         headers=auth_headers

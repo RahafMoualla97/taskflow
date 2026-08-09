@@ -1,11 +1,9 @@
 """
 Invitation service for managing project invitations.
 
-This service handles:
-- Creating and sending project invitations via email
-- Accepting invitations with token validation
-- Checking invitation validity
-- Reactivating soft-deleted members
+Handles creating and sending project invitations via email, accepting
+invitations with token validation, checking invitation validity,
+and reactivating soft-deleted members.
 """
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status

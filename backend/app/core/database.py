@@ -1,10 +1,10 @@
 """
 Database connection and session management.
 
-This module provides:
+Provides:
 - SQLAlchemy engine configuration
 - Session factory for database operations
-- Base class for all models
+- Base class for all ORM models
 - Dependency injection for database sessions
 """
 from sqlalchemy import create_engine
@@ -14,8 +14,7 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
 
-# ========== Engine Configuration ==========
-
+# SQLAlchemy Engine Configuration
 engine = create_engine(
     settings.DATABASE_URL,
     pool_pre_ping=True,
@@ -23,8 +22,7 @@ engine = create_engine(
 )
 
 
-# ========== Session Factory ==========
-
+# Session Factory
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
@@ -32,12 +30,9 @@ SessionLocal = sessionmaker(
 )
 
 
-# ========== Base Model ==========
-
+# Base ORM Model Class
 Base = declarative_base()
 
-
-# ========== Dependency Injection ==========
 
 def get_db():
     """

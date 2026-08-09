@@ -1,12 +1,8 @@
 """
 Project management API endpoints.
-
-This module handles project CRUD operations including:
-- Creating new projects
-- Retrieving user projects
-- Searching projects by name/description/key
-- Updating project details
-- Soft deleting projects
+Handles project CRUD operations including creating new projects,
+retrieving user projects, searching projects by name/description/key,
+updating project details, and soft deleting projects.
 """
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -32,14 +28,14 @@ def create_project(
 ):
     """
     Create a new project.
-
+    
     The creator automatically becomes the project Owner.
-
+    
     Args:
         project_data: Project creation data (name, description)
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         The newly created Project object
     """
@@ -53,13 +49,13 @@ def get_projects(
 ):
     """
     Get all projects the current user is a member of.
-
+    
     Returns only active projects (is_deleted=False).
-
+    
     Args:
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         List of Project objects
     """
@@ -74,14 +70,14 @@ def search_projects(
 ):
     """
     Search for projects by name, description, or key.
-
+    
     Only searches within projects the user is a member of.
-
+    
     Args:
         q: Search term (minimum 1 character)
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         List of Project objects matching the search
     """
@@ -115,15 +111,15 @@ def get_project(
 ):
     """
     Get a specific project by ID.
-
+    
     Args:
-        project_id: ID of the project
-        current_user: Authenticated user (must be a project member)
+        project_id: The ID of the project
+        current_user: The authenticated user (must be a project member)
         db: Database session
-
+    
     Returns:
         Project object
-
+    
     Raises:
         HTTPException 403: User is not a project member
         HTTPException 404: Project not found
@@ -140,18 +136,18 @@ def update_project(
 ):
     """
     Update an existing project.
-
+    
     Only Admins and Owners can update projects.
-
+    
     Args:
-        project_id: ID of the project
+        project_id: The ID of the project
         project_data: Updated project data
-        current_user: Authenticated user (must be Admin or Owner)
+        current_user: The authenticated user (must be Admin or Owner)
         db: Database session
-
+    
     Returns:
         The updated Project object
-
+    
     Raises:
         HTTPException 403: User lacks permission
         HTTPException 404: Project not found
@@ -167,18 +163,18 @@ def delete_project(
 ):
     """
     Soft delete a project.
-
+    
     Only the Owner can delete a project.
     Associated notifications are also deleted.
-
+    
     Args:
-        project_id: ID of the project
-        current_user: Authenticated user (must be Owner)
+        project_id: The ID of the project
+        current_user: The authenticated user (must be Owner)
         db: Database session
-
+    
     Returns:
         None (204 No Content)
-
+    
     Raises:
         HTTPException 403: User is not the project owner
         HTTPException 404: Project not found

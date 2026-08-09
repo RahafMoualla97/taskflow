@@ -1,10 +1,9 @@
 """
 Invitation model for project and task invitations.
 
-This model manages:
-- Email-based invitations to projects/tasks
-- Unique token generation for secure acceptance
-- Invitation expiration and status tracking
+Manages email-based invitations to projects or tasks with unique
+token generation for secure acceptance, expiration tracking,
+and status management.
 """
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import relationship

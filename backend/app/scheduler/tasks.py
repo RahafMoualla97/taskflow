@@ -1,7 +1,7 @@
 """
 Scheduled background tasks for the application.
 
-This module contains tasks that run periodically:
+Contains periodic tasks:
 - Deadline reminders: Sent every 12 hours to users with tasks due within 24 hours
 """
 from datetime import datetime, timedelta, timezone
@@ -17,18 +17,14 @@ def send_deadline_reminders() -> None:
     """
     Send deadline reminders to assignees of tasks due within the next 24 hours.
 
-    This function runs every 12 hours via the APScheduler.
-    It finds tasks that:
+    Runs every 12 hours via APScheduler. Finds tasks that:
     - Are not completed (status != "Done")
     - Have a due date set
     - Are due within the next 24 hours
     - Have not had a reminder sent yet
 
-    For each qualifying task, a notification is created for the assignee
-    and the task's reminder_sent flag is updated to prevent duplicate reminders.
-
-    Returns:
-        None
+    Creates a notification for each qualifying task's assignee and updates
+    the reminder_sent flag to prevent duplicate reminders.
     """
     db = SessionLocal()
     try:

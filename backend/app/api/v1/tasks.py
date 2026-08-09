@@ -1,11 +1,8 @@
 """
 Task management API endpoints.
-
-This module handles task CRUD operations including:
-- Creating, updating, deleting tasks
-- Getting tasks by project with filtering
-- Advanced search with multiple filters
-- Managing task collaborators and watchers
+Handles task CRUD operations including creating, updating, deleting tasks,
+getting tasks by project with filtering, advanced search with multiple filters,
+and managing task collaborators and watchers.
 """
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -23,8 +20,6 @@ from app.services.task_service import TaskService
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 
-# ========== Core CRUD Operations ==========
-
 @router.post("/", response_model=TaskOut, status_code=status.HTTP_201_CREATED)
 def create_task(
     task_data: TaskCreate,
@@ -33,18 +28,18 @@ def create_task(
 ):
     """
     Create a new task.
-
+    
     The creator becomes the task reporter.
     An assignee can be optionally specified.
-
+    
     Args:
         task_data: Task creation data
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         The newly created Task object
-
+    
     Raises:
         HTTPException 404: Project not found
         HTTPException 403: User is not a project member
@@ -62,16 +57,16 @@ def get_project_tasks(
 ):
     """
     Get all tasks for a specific project.
-
+    
     Args:
-        project_id: ID of the project
+        project_id: The ID of the project
         status: Optional status filter
-        current_user: Authenticated user (must be a project member)
+        current_user: The authenticated user (must be a project member)
         db: Database session
-
+    
     Returns:
         List of Task objects
-
+    
     Raises:
         HTTPException 403: User is not a project member
     """
@@ -94,9 +89,9 @@ def search_tasks(
 ):
     """
     Advanced search for tasks with multiple filters.
-
+    
     Only searches tasks in projects the user is a member of.
-
+    
     Args:
         q: Search term for title/description
         status: Filter by status
@@ -107,9 +102,9 @@ def search_tasks(
         due_to: Filter tasks with due date before this date
         sort_by: Field to sort by
         sort_order: Sort order (asc or desc)
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         List of Task objects matching the filters
     """
@@ -169,15 +164,15 @@ def get_task(
 ):
     """
     Get a specific task by ID.
-
+    
     Args:
-        task_id: ID of the task
-        current_user: Authenticated user (must be a project member)
+        task_id: The ID of the task
+        current_user: The authenticated user (must be a project member)
         db: Database session
-
+    
     Returns:
         Task object with enriched data (assignee_name, reporter_name, etc.)
-
+    
     Raises:
         HTTPException 404: Task not found
         HTTPException 403: User is not a project member
@@ -194,18 +189,18 @@ def update_task(
 ):
     """
     Update an existing task.
-
+    
     Only the assignee, Admin, or Owner can update a task.
-
+    
     Args:
-        task_id: ID of the task
+        task_id: The ID of the task
         task_data: Updated task data
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         The updated Task object
-
+    
     Raises:
         HTTPException 404: Task not found
         HTTPException 403: User lacks permission
@@ -223,19 +218,19 @@ def update_task_status(
 ):
     """
     Update the status of a task.
-
+    
     Status transitions: ToDo -> InProgress -> Done
     Direct ToDo -> Done is not allowed.
-
+    
     Args:
-        task_id: ID of the task
+        task_id: The ID of the task
         status_data: New status
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         The updated Task object
-
+    
     Raises:
         HTTPException 404: Task not found
         HTTPException 400: Invalid status or transition
@@ -254,18 +249,18 @@ def delete_task(
 ):
     """
     Soft delete a task.
-
+    
     Only the reporter, Admin, or Owner can delete a task.
     Associated notifications are also deleted.
-
+    
     Args:
-        task_id: ID of the task
-        current_user: Authenticated user
+        task_id: The ID of the task
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         None (204 No Content)
-
+    
     Raises:
         HTTPException 404: Task not found
         HTTPException 403: User lacks permission
@@ -273,8 +268,6 @@ def delete_task(
     TaskService.delete_task(db, task_id, current_user.id)
     return None
 
-
-# ========== Collaborator & Watcher Management ==========
 
 @router.post("/{task_id}/collaborators")
 def add_collaborator(
@@ -285,18 +278,18 @@ def add_collaborator(
 ):
     """
     Add a collaborator to a task.
-
+    
     Collaborators are users who work on the task but are not responsible for it.
-
+    
     Args:
-        task_id: ID of the task
+        task_id: The ID of the task
         email: Email of the user to add
-        current_user: Authenticated user (must be reporter, Admin, or Owner)
+        current_user: The authenticated user (must be reporter, Admin, or Owner)
         db: Database session
-
+    
     Returns:
         Success message
-
+    
     Raises:
         HTTPException 404: Task or user not found
         HTTPException 403: User lacks permission
@@ -314,16 +307,16 @@ def remove_collaborator(
 ):
     """
     Remove a collaborator from a task.
-
+    
     Args:
-        task_id: ID of the task
-        user_id: ID of the collaborator to remove
-        current_user: Authenticated user (must be reporter, Admin, or Owner)
+        task_id: The ID of the task
+        user_id: The ID of the collaborator to remove
+        current_user: The authenticated user (must be reporter, Admin, or Owner)
         db: Database session
-
+    
     Returns:
         Success message
-
+    
     Raises:
         HTTPException 404: Task or user not found
         HTTPException 403: User lacks permission
@@ -342,18 +335,18 @@ def add_watcher(
 ):
     """
     Add a watcher to a task.
-
+    
     Watchers follow task progress without responsibility.
-
+    
     Args:
-        task_id: ID of the task
+        task_id: The ID of the task
         email: Email of the user to add
-        current_user: Authenticated user (must be reporter, Admin, or Owner)
+        current_user: The authenticated user (must be reporter, Admin, or Owner)
         db: Database session
-
+    
     Returns:
         Success message
-
+    
     Raises:
         HTTPException 404: Task or user not found
         HTTPException 403: User lacks permission
@@ -371,16 +364,16 @@ def remove_watcher(
 ):
     """
     Remove a watcher from a task.
-
+    
     Args:
-        task_id: ID of the task
-        user_id: ID of the watcher to remove
-        current_user: Authenticated user (must be reporter, Admin, or Owner)
+        task_id: The ID of the task
+        user_id: The ID of the watcher to remove
+        current_user: The authenticated user (must be reporter, Admin, or Owner)
         db: Database session
-
+    
     Returns:
         Success message
-
+    
     Raises:
         HTTPException 404: Task or user not found
         HTTPException 403: User lacks permission

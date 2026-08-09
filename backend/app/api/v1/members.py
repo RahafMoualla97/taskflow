@@ -1,11 +1,8 @@
 """
 Member management API endpoints.
-
-This module handles project member operations including:
-- Listing project members
-- Adding new members (or reactivating deleted ones)
-- Updating member roles
-- Removing members (soft delete)
+Handles project member operations including listing project members,
+adding new members (or reactivating deleted ones), updating member roles,
+and removing members (soft delete).
 """
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -28,18 +25,18 @@ def get_project_members(
 ):
     """
     Get all active members of a project.
-
+    
     Only returns members with is_deleted=False.
     Includes user details (name, email, role, joined date).
-
+    
     Args:
-        project_id: ID of the project
-        current_user: Authenticated user (must be a project member)
+        project_id: The ID of the project
+        current_user: The authenticated user (must be a project member)
         db: Database session
-
+    
     Returns:
         List of member objects with user details
-
+    
     Raises:
         HTTPException 403: User is not a project member
         HTTPException 404: Project not found
@@ -56,19 +53,19 @@ def add_project_member(
 ):
     """
     Add a new member to a project or reactivate a soft-deleted member.
-
+    
     Only Admins and Owners can add members.
     If the user was previously removed (soft delete), they will be reactivated.
-
+    
     Args:
-        project_id: ID of the project
+        project_id: The ID of the project
         member_data: User ID and role for the new member
-        current_user: Authenticated user (must be Admin or Owner)
+        current_user: The authenticated user (must be Admin or Owner)
         db: Database session
-
+    
     Returns:
         Success message with user_id and role
-
+    
     Raises:
         HTTPException 403: User lacks permission
         HTTPException 400: User is already a member
@@ -89,21 +86,21 @@ def update_member_role(
 ):
     """
     Update a member's role in a project.
-
+    
     Only Admins and Owners can update roles.
     Owner role cannot be changed.
     Only Owner can change Admin role.
-
+    
     Args:
-        project_id: ID of the project
-        user_id: ID of the member to update
+        project_id: The ID of the project
+        user_id: The ID of the member to update
         role_data: New role data
-        current_user: Authenticated user (must be Admin or Owner)
+        current_user: The authenticated user (must be Admin or Owner)
         db: Database session
-
+    
     Returns:
         Success message with user_id and new_role
-
+    
     Raises:
         HTTPException 403: User lacks permission
         HTTPException 400: Cannot change Owner role
@@ -123,20 +120,20 @@ def remove_project_member(
 ):
     """
     Remove a member from a project (soft delete).
-
+    
     Only Admins and Owners can remove members.
     Owner cannot be removed.
     The member can be reactivated later via the add endpoint.
-
+    
     Args:
-        project_id: ID of the project
-        user_id: ID of the member to remove
-        current_user: Authenticated user (must be Admin or Owner)
+        project_id: The ID of the project
+        user_id: The ID of the member to remove
+        current_user: The authenticated user (must be Admin or Owner)
         db: Database session
-
+    
     Returns:
         None (204 No Content)
-
+    
     Raises:
         HTTPException 403: User lacks permission
         HTTPException 400: Cannot remove Owner

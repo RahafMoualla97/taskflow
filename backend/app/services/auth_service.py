@@ -1,11 +1,8 @@
 """
 Authentication service for user management and JWT token generation.
 
-This service handles:
-- User registration with password hashing
-- User login with credential verification
-- Google OAuth user creation/retrieval
-- JWT token generation
+Handles user registration with password hashing, user login with credential
+verification, Google OAuth user creation/retrieval, and JWT token generation.
 """
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status

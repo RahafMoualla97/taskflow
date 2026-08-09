@@ -1,7 +1,7 @@
 """
 TaskFlow API - Main application entry point.
 
-This module initializes the FastAPI application with:
+Initializes the FastAPI application with:
 - CORS middleware for frontend communication
 - Session middleware for Google OAuth
 - Background scheduler for deadline reminders
@@ -20,7 +20,7 @@ from app.scheduler.tasks import send_deadline_reminders
 from apscheduler.schedulers.background import BackgroundScheduler
 
 
-# ========== Application Initialization ==========
+# Application Initialization
 
 app = FastAPI(
     title="TaskFlow API",
@@ -31,9 +31,8 @@ app = FastAPI(
 )
 
 
-# ========== Middleware Configuration ==========
+# Middleware Configuration
 
-# CORS Configuration - Allow frontend applications to access the API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -50,7 +49,6 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-# Session middleware for Google OAuth
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
@@ -58,15 +56,21 @@ app.add_middleware(
 )
 
 
-# ========== Router Registration ==========
+# Router Registration
 
 app.include_router(v1_router, prefix="/api/v1")
 
 
-# ========== Root Endpoints ==========
+# Root Endpoints
 
 @app.get("/")
 async def root():
+    """
+    Root endpoint providing API information.
+
+    Returns:
+        Dictionary with API name, version, and documentation URL
+    """
     return {
         "message": "TaskFlow API is running!",
         "version": "1.0.0",
@@ -76,10 +80,16 @@ async def root():
 
 @app.get("/health")
 async def health_check():
+    """
+    Health check endpoint for monitoring and uptime verification.
+
+    Returns:
+        Dictionary with service status and database connectivity
+    """
     return {"status": "healthy", "database": "connected"}
 
 
-# ========== Background Scheduler ==========
+# Background Scheduler
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(
@@ -92,15 +102,16 @@ scheduler.add_job(
 scheduler.start()
 
 
-# ========== Shutdown Handler ==========
+# Shutdown Handler
 
 @app.on_event("shutdown")
 def shutdown_scheduler():
+    """Gracefully shut down the background scheduler on application exit."""
     if scheduler.running:
         scheduler.shutdown()
 
 
-# ========== Development Server ==========
+# Development Server
 
 if __name__ == "__main__":
     uvicorn.run(

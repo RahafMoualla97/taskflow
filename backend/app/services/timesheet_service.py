@@ -1,11 +1,8 @@
 """
 Timesheet service for tracking work hours on tasks.
 
-This service handles:
-- Logging work hours on tasks
-- Retrieving timesheets for tasks and users
-- Weekly summary generation
-- Admin access to all timesheets
+Handles logging work hours on tasks, retrieving timesheets for tasks and users,
+weekly summary generation, and admin access to all timesheets.
 """
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status

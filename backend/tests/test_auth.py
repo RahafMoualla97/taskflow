@@ -1,12 +1,15 @@
 """
 Tests for authentication endpoints.
+
+Covers user registration, login, profile management,
+and JWT token validation.
 """
 from fastapi import status
 from app.core.security import create_access_token, verify_password
 
 
 def test_register_user(client, db_session):
-    """Test user registration."""
+    """Test successful user registration."""
     response = client.post(
         "/api/v1/auth/register",
         json={
@@ -21,11 +24,11 @@ def test_register_user(client, db_session):
     assert data["email"] == "newuser@example.com"
     assert data["name"] == "New User"
     assert "id" in data
-    assert "hashed_password" not in data  # Password should not be returned
+    assert "hashed_password" not in data
 
 
 def test_register_duplicate_email(client, db_session, test_user):
-    """Test registration with already existing email."""
+    """Test registration with an email that already exists."""
     response = client.post(
         "/api/v1/auth/register",
         json={
@@ -40,7 +43,7 @@ def test_register_duplicate_email(client, db_session, test_user):
 
 
 def test_login_success(client, db_session, test_user):
-    """Test successful login."""
+    """Test successful login with valid credentials."""
     response = client.post(
         "/api/v1/auth/login",
         data={
@@ -56,7 +59,7 @@ def test_login_success(client, db_session, test_user):
 
 
 def test_login_invalid_password(client, db_session, test_user):
-    """Test login with invalid password."""
+    """Test login with incorrect password."""
     response = client.post(
         "/api/v1/auth/login",
         data={
@@ -70,7 +73,7 @@ def test_login_invalid_password(client, db_session, test_user):
 
 
 def test_login_nonexistent_user(client, db_session):
-    """Test login with non-existent user."""
+    """Test login with a non-existent user."""
     response = client.post(
         "/api/v1/auth/login",
         data={
@@ -84,7 +87,7 @@ def test_login_nonexistent_user(client, db_session):
 
 
 def test_get_current_user(client, db_session, auth_headers, test_user):
-    """Test getting current user profile."""
+    """Test retrieving the current authenticated user's profile."""
     response = client.get(
         "/api/v1/auth/users/me",
         headers=auth_headers
@@ -98,14 +101,14 @@ def test_get_current_user(client, db_session, auth_headers, test_user):
 
 
 def test_get_current_user_unauthorized(client):
-    """Test getting user profile without authentication."""
+    """Test accessing user profile without authentication token."""
     response = client.get("/api/v1/auth/users/me")
     
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_update_user_profile(client, db_session, auth_headers, test_user):
-    """Test updating user profile."""
+    """Test updating the current user's profile."""
     response = client.put(
         "/api/v1/auth/users/me",
         json={  
@@ -120,7 +123,6 @@ def test_update_user_profile(client, db_session, auth_headers, test_user):
     assert data["name"] == "Updated Name"
     assert data["avatar_url"] == "https://example.com/avatar.jpg"
     
-    # Verify database was updated
     db_session.refresh(test_user)
     assert test_user.name == "Updated Name"
     assert test_user.avatar_url == "https://example.com/avatar.jpg"

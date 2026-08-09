@@ -1,12 +1,15 @@
 """
 Tests for member management endpoints.
+
+Covers listing members, adding members, updating roles,
+and removing members with soft delete.
 """
 from fastapi import status
 from app.models.member import ProjectMember
 
 
 def test_get_project_members(client, db_session, auth_headers, test_user, test_project):
-    """Test getting project members."""
+    """Test retrieving all members of a project."""
     response = client.get(
         f"/api/v1/projects/{test_project.id}/members",
         headers=auth_headers
@@ -53,7 +56,6 @@ def test_add_member_already_member(client, db_session, auth_headers, test_user, 
 
 def test_update_member_role(client, db_session, auth_headers, test_user, test_user2, test_project):
     """Test updating a member's role."""
-    # First add test_user2 as a member
     member = ProjectMember(
         project_id=test_project.id,
         user_id=test_user2.id,
@@ -75,8 +77,7 @@ def test_update_member_role(client, db_session, auth_headers, test_user, test_us
 
 
 def test_remove_project_member(client, db_session, auth_headers, test_user, test_user2, test_project):
-    """Test removing a member from a project."""
-    # First add test_user2 as a member
+    """Test soft deleting a member from a project."""
     member = ProjectMember(
         project_id=test_project.id,
         user_id=test_user2.id,
@@ -92,7 +93,6 @@ def test_remove_project_member(client, db_session, auth_headers, test_user, test
     
     assert response.status_code == status.HTTP_204_NO_CONTENT
     
-    # Verify member is soft deleted
     deleted_member = db_session.query(ProjectMember).filter(
         ProjectMember.project_id == test_project.id,
         ProjectMember.user_id == test_user2.id
@@ -101,7 +101,7 @@ def test_remove_project_member(client, db_session, auth_headers, test_user, test
 
 
 def test_remove_owner_fails(client, db_session, auth_headers, test_user, test_project):
-    """Test that removing the owner is not allowed."""
+    """Test that removing the project owner is not allowed."""
     response = client.delete(
         f"/api/v1/projects/{test_project.id}/members/{test_user.id}",
         headers=auth_headers

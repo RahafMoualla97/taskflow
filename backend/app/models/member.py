@@ -1,10 +1,9 @@
 """
 ProjectMember model for managing project membership and roles.
 
-This model handles:
-- User membership in projects
-- Role-based access control (Owner, Admin, Member, Viewer)
-- Soft deletion of memberships
+Handles user membership in projects with role-based access control
+(Owner, Admin, Member, Viewer) and soft deletion of memberships
+for reactivation support.
 """
 from sqlalchemy import Column, Integer, ForeignKey, String, UniqueConstraint, Boolean
 from sqlalchemy.orm import relationship

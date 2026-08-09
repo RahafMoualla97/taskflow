@@ -1,4 +1,3 @@
-// frontend/src/components/Layout.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -31,7 +30,7 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
+      {/* Sidebar Navigation */}
       <aside className="w-64 bg-white shadow-lg fixed h-full">
         <div className="p-4 border-b">
           <h1 className="text-2xl font-bold text-blue-600">TaskFlow</h1>
@@ -73,7 +72,7 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <div className="ml-64 flex-1">
         {/* Top Bar */}
         <header className="bg-white shadow-sm px-6 py-3 flex items-center justify-between sticky top-0 z-10">
@@ -81,7 +80,6 @@ const Layout = ({ children }: LayoutProps) => {
             <h2 className="text-xl font-semibold text-gray-800">Welcome back, {user?.name || 'User'}!</h2>
           </div>
           <div className="flex items-center gap-4">
-            {/* ✅ NotificationBell (بدون Socket) */}
             <NotificationBell />
 
             {/* Profile Dropdown */}

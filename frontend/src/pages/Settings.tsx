@@ -16,7 +16,6 @@ const Settings = () => {
     }
     setLoading(true);
     try {
-      // TODO: اضيفي نقطة نهاية لتغيير كلمة المرور في الباك إند
       await apiClient.post('/auth/change-password', {
         current_password: currentPassword,
         new_password: newPassword,

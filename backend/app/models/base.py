@@ -1,8 +1,7 @@
 """
 Base model class for all database models.
 
-This abstract base class provides common fields and functionality
-for all models including:
+Provides common fields and functionality for all models including:
 - Auto-incrementing primary key (id)
 - Creation timestamp (created_at)
 - Last update timestamp (updated_at)

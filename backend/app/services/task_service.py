@@ -1,12 +1,8 @@
 """
 Task service layer - Core business logic for task management.
 
-This service handles:
-- Task CRUD operations
-- Task status transitions
-- Comment management with mentions
-- Collaborator and watcher management
-- Dashboard task queries
+Handles task CRUD operations, task status transitions, comment management
+with mentions, collaborator and watcher management, and dashboard task queries.
 """
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
@@ -25,16 +21,25 @@ from app.services.notification_service import NotificationService
 
 
 class TaskService:
-    """
-    Service for task-related business logic.
-    """
-
-    # ========== Core CRUD Operations ==========
+    """Service for task-related business logic."""
 
     @staticmethod
     def create_task(db: Session, task_data: TaskCreate, reporter_id: int) -> Task:
         """
         Create a new task.
+
+        Args:
+            db: Database session
+            task_data: Task creation data
+            reporter_id: ID of the user creating the task
+
+        Returns:
+            The newly created Task object
+
+        Raises:
+            HTTPException 404: Project not found
+            HTTPException 403: User is not a project member
+            HTTPException 400: Assignee is not a project member
         """
         project = db.query(Project).filter(
             Project.id == task_data.project_id,
@@ -122,6 +127,18 @@ class TaskService:
     ) -> List[Task]:
         """
         Get all tasks for a specific project.
+
+        Args:
+            db: Database session
+            project_id: ID of the project
+            user_id: ID of the current user
+            status: Optional status filter
+
+        Returns:
+            List of Task objects
+
+        Raises:
+            HTTPException 403: User is not a project member
         """
         member = db.query(ProjectMember).filter(
             ProjectMember.project_id == project_id,
@@ -147,6 +164,18 @@ class TaskService:
     def get_task_by_id(db: Session, task_id: int, user_id: int) -> dict:
         """
         Get a specific task with enriched data.
+
+        Args:
+            db: Database session
+            task_id: ID of the task
+            user_id: ID of the current user
+
+        Returns:
+            Task dictionary with enriched data
+
+        Raises:
+            HTTPException 404: Task not found
+            HTTPException 403: User is not a project member
         """
         task = db.query(Task).filter(
             Task.id == task_id,
@@ -223,6 +252,20 @@ class TaskService:
     def update_task(db: Session, task_id: int, user_id: int, task_data: TaskUpdate) -> Task:
         """
         Update an existing task.
+
+        Args:
+            db: Database session
+            task_id: ID of the task
+            user_id: ID of the current user
+            task_data: Updated task data
+
+        Returns:
+            The updated Task object
+
+        Raises:
+            HTTPException 404: Task not found
+            HTTPException 403: User lacks permission
+            HTTPException 400: Assignee is not a project member
         """
         task = db.query(Task).filter(
             Task.id == task_id,
@@ -340,6 +383,20 @@ class TaskService:
     ) -> Task:
         """
         Update the status of a task.
+
+        Args:
+            db: Database session
+            task_id: ID of the task
+            user_id: ID of the current user
+            new_status: New status (ToDo, InProgress, Done)
+
+        Returns:
+            The updated Task object
+
+        Raises:
+            HTTPException 404: Task not found
+            HTTPException 400: Invalid status or transition
+            HTTPException 403: User lacks permission
         """
         task = db.query(Task).filter(
             Task.id == task_id,
@@ -423,6 +480,14 @@ class TaskService:
     def delete_task(db: Session, task_id: int, user_id: int) -> None:
         """
         Soft delete a task.
+
+        Args:
+            db: Database session
+            task_id: ID of the task
+            user_id: ID of the current user
+
+        Raises:
+            HTTPException 403: User lacks permission
         """
         task = TaskService.get_task_by_id(db, task_id, user_id)
 
@@ -446,8 +511,6 @@ class TaskService:
             task_obj.is_deleted = True
             db.commit()
 
-    # ========== Comment Operations ==========
-
     @staticmethod
     def add_comment(
         db: Session,
@@ -458,6 +521,20 @@ class TaskService:
     ) -> Comment:
         """
         Add a comment to a task with support for mentions.
+
+        Args:
+            db: Database session
+            task_id: ID of the task
+            user_id: ID of the comment author
+            content: Comment content
+            mentions: List of mentioned user IDs
+
+        Returns:
+            The newly created Comment object
+
+        Raises:
+            HTTPException 404: Task not found
+            HTTPException 403: User is not a project member
         """
         task = db.query(Task).filter(
             Task.id == task_id,
@@ -538,6 +615,18 @@ class TaskService:
     def get_task_comments(db: Session, task_id: int, user_id: int) -> List[dict]:
         """
         Get all comments for a task with author information.
+
+        Args:
+            db: Database session
+            task_id: ID of the task
+            user_id: ID of the current user
+
+        Returns:
+            List of comment dictionaries
+
+        Raises:
+            HTTPException 404: Task not found
+            HTTPException 403: User is not a project member
         """
         task = db.query(Task).filter(
             Task.id == task_id,
@@ -588,6 +677,15 @@ class TaskService:
     def delete_comment(db: Session, comment_id: int, user_id: int) -> None:
         """
         Soft delete a comment.
+
+        Args:
+            db: Database session
+            comment_id: ID of the comment
+            user_id: ID of the current user
+
+        Raises:
+            HTTPException 404: Comment not found
+            HTTPException 403: User lacks permission
         """
         comment = db.query(Comment).filter(
             Comment.id == comment_id,
@@ -625,8 +723,6 @@ class TaskService:
         comment.is_deleted = True
         db.commit()
 
-    # ========== Collaborator & Watcher Operations ==========
-
     @staticmethod
     def add_collaborator(
         db: Session,
@@ -636,6 +732,20 @@ class TaskService:
     ) -> dict:
         """
         Add a collaborator to a task.
+
+        Args:
+            db: Database session
+            task_id: ID of the task
+            current_user_id: ID of the current user
+            email: Email of the user to add
+
+        Returns:
+            Success message
+
+        Raises:
+            HTTPException 404: Task or user not found
+            HTTPException 403: User lacks permission
+            HTTPException 400: User is already a collaborator
         """
         task = db.query(Task).filter(
             Task.id == task_id,
@@ -712,6 +822,20 @@ class TaskService:
     ) -> dict:
         """
         Remove a collaborator from a task.
+
+        Args:
+            db: Database session
+            task_id: ID of the task
+            current_user_id: ID of the current user
+            user_id: ID of the collaborator to remove
+
+        Returns:
+            Success message
+
+        Raises:
+            HTTPException 404: Task or user not found
+            HTTPException 403: User lacks permission
+            HTTPException 400: User is not a collaborator
         """
         task = db.query(Task).filter(
             Task.id == task_id,
@@ -776,6 +900,20 @@ class TaskService:
     ) -> dict:
         """
         Add a watcher to a task.
+
+        Args:
+            db: Database session
+            task_id: ID of the task
+            current_user_id: ID of the current user
+            email: Email of the user to add
+
+        Returns:
+            Success message
+
+        Raises:
+            HTTPException 404: Task or user not found
+            HTTPException 403: User lacks permission
+            HTTPException 400: User is already a watcher
         """
         task = db.query(Task).filter(
             Task.id == task_id,
@@ -852,6 +990,20 @@ class TaskService:
     ) -> dict:
         """
         Remove a watcher from a task.
+
+        Args:
+            db: Database session
+            task_id: ID of the task
+            current_user_id: ID of the current user
+            user_id: ID of the watcher to remove
+
+        Returns:
+            Success message
+
+        Raises:
+            HTTPException 404: Task or user not found
+            HTTPException 403: User lacks permission
+            HTTPException 400: User is not a watcher
         """
         task = db.query(Task).filter(
             Task.id == task_id,
@@ -907,12 +1059,18 @@ class TaskService:
         db.commit()
         return {"message": "Watcher removed successfully"}
 
-    # ========== Dashboard Operations ==========
-
     @staticmethod
     def get_recent_tasks(db: Session, user_id: int, limit: int = 5) -> List[Task]:
         """
         Get the most recent tasks for a user.
+
+        Args:
+            db: Database session
+            user_id: ID of the user
+            limit: Maximum number of tasks to return
+
+        Returns:
+            List of recent Task objects
         """
         member_projects = db.query(ProjectMember).filter(
             ProjectMember.user_id == user_id,
@@ -934,6 +1092,13 @@ class TaskService:
     def get_overdue_tasks(db: Session, user_id: int) -> List[Task]:
         """
         Get overdue tasks for a user.
+
+        Args:
+            db: Database session
+            user_id: ID of the user
+
+        Returns:
+            List of overdue Task objects
         """
         member_projects = db.query(ProjectMember).filter(
             ProjectMember.user_id == user_id,
@@ -959,6 +1124,13 @@ class TaskService:
     def get_my_tasks(db: Session, user_id: int) -> List[Task]:
         """
         Get tasks assigned to the current user.
+
+        Args:
+            db: Database session
+            user_id: ID of the user
+
+        Returns:
+            List of Task objects assigned to the user
         """
         return db.query(Task).filter(
             Task.assignee_id == user_id,

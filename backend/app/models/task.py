@@ -1,13 +1,10 @@
 """
 Task model for managing work items within projects.
 
-This model handles:
-- Task creation with title, description, and metadata
-- Status tracking (ToDo, InProgress, Done)
-- Assignment to users (assignee, reporter)
-- Collaborators and watchers via many-to-many relationships
-- Time tracking (estimated and logged hours)
-- Soft deletion support
+Handles task creation with title, description, and metadata,
+status tracking (ToDo, InProgress, Done), assignment to users,
+collaborators and watchers via many-to-many relationships,
+time tracking, and soft deletion support.
 """
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Boolean, Table
 from sqlalchemy.orm import relationship
@@ -16,7 +13,7 @@ from app.models.base import BaseModel
 from app.core.database import Base
 
 
-# ========== Association Tables ==========
+# Association Tables for Many-to-Many Relationships
 
 task_collaborators = Table(
     'task_collaborators',

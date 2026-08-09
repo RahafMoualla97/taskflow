@@ -1,4 +1,3 @@
-// frontend/src/context/AuthContext.tsx
 import { createContext, useState, useContext, useEffect } from 'react';
 import apiClient from '../api/client';
 import type { User, AuthContextType } from '../types';
@@ -11,24 +10,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('🔍 AuthContext - Token changed:', token);
     if (token) {
       fetchUser();
     } else {
       setLoading(false);
     }
-    
-    // ✅ تأكد أنه لا يوجد كود يمسح redirectAfterLogin هنا
   }, [token]);
 
   const fetchUser = async () => {
-    console.log('📡 Fetching user...');
     try {
       const response = await apiClient.get('/auth/users/me');
-      console.log('✅ User fetched:', response.data);
       setUser(response.data);
     } catch (error) {
-      console.error('❌ Failed to fetch user:', error);
       localStorage.removeItem('token');
       setToken(null);
     } finally {
@@ -62,7 +55,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const googleLogin = () => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
-    console.log('🌐 Redirecting to Google OAuth:', `${apiUrl}/auth/google`);
     window.location.href = `${apiUrl}/auth/google`;
   };
 

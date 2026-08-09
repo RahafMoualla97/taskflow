@@ -1,7 +1,7 @@
 """
 Dependency injection utilities for authentication and authorization.
 
-This module provides:
+Provides:
 - JWT token validation and user retrieval
 - Active user verification
 - Project membership and role authorization checks
@@ -21,7 +21,7 @@ from app.models.member import ProjectMember
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
-# ========== Authentication Dependencies ==========
+# Authentication Dependencies
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
@@ -88,7 +88,7 @@ async def get_current_active_user(
     return current_user
 
 
-# ========== Authorization Dependencies ==========
+# Authorization Dependencies
 
 def check_project_member(
     project_id: int,

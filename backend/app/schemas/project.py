@@ -1,7 +1,7 @@
 """
 Project Pydantic schemas.
 
-This module defines the request/response schemas for:
+Defines request/response schemas for:
 - Creating and updating projects
 - Project responses with statistics
 """

@@ -1,8 +1,6 @@
 """
 Activity API endpoints for retrieving project and task activity logs.
-
-This module provides endpoints to fetch recent activities for projects,
-tasks, and the current user's dashboard.
+Provides endpoints to fetch recent activities for projects, tasks, and user dashboards.
 """
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -26,15 +24,15 @@ def get_project_activities(
 ):
     """
     Retrieve activity logs for a specific project.
-
+    
     Requires the user to be a member of the project.
-
+    
     Args:
-        project_id: ID of the project
+        project_id: The ID of the project
         limit: Maximum number of activities to return (1-100)
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         List of activity records for the project
     """
@@ -51,15 +49,15 @@ def get_task_activities(
 ):
     """
     Retrieve activity logs for a specific task.
-
+    
     Requires the user to be a member of the task's project.
-
+    
     Args:
-        task_id: ID of the task
+        task_id: The ID of the task
         limit: Maximum number of activities to return (1-50)
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         List of activity records for the task
     """
@@ -75,15 +73,15 @@ def get_recent_activities(
 ):
     """
     Retrieve recent activities for the current user.
-
+    
     Returns activities from all projects the user is a member of,
     ordered by most recent first.
-
+    
     Args:
         limit: Maximum number of activities to return (1-50)
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         List of recent activity records for the user
     """

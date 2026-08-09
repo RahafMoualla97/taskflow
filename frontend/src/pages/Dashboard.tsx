@@ -224,6 +224,7 @@ const Dashboard = () => {
         </button>
       </div>
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {statCards.map((stat) => (
           <div key={stat.title} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
@@ -240,6 +241,7 @@ const Dashboard = () => {
         ))}
       </div>
 
+      {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">📊 Tasks by Status</h3>
@@ -286,6 +288,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Weekly Activity Chart */}
       {advancedStats && advancedStats.weekly_activity.length > 0 && (
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">📈 Weekly Activity</h3>
@@ -303,6 +306,7 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Recent & Overdue Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-4">
@@ -373,6 +377,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Tasks by Project */}
       {projectData.length > 0 && (
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">📁 Tasks by Project</h3>
@@ -388,6 +393,7 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Recent Activity Feed */}
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">📊 Recent Activity</h3>
         <div className="space-y-3 max-h-80 overflow-y-auto">
@@ -423,6 +429,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Quick Projects */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-900">🚀 Quick Projects</h3>

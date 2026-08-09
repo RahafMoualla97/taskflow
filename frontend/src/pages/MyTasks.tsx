@@ -39,7 +39,6 @@ const MyTasks = () => {
   useEffect(() => {
     let filtered = [...tasks];
     
-    // ✅ بحث
     if (searchTerm.trim()) {
       filtered = filtered.filter(t =>
         t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -47,12 +46,10 @@ const MyTasks = () => {
       );
     }
     
-    // ✅ فلترة حسب الحالة
     if (statusFilter !== 'all') {
       filtered = filtered.filter(t => t.status === statusFilter);
     }
     
-    // ✅ فلترة حسب الأولوية
     if (priorityFilter !== 'all') {
       filtered = filtered.filter(t => t.priority === priorityFilter);
     }
@@ -109,7 +106,6 @@ const MyTasks = () => {
         <h1 className="text-2xl font-bold text-gray-900">📋 My Tasks</h1>
         
         <div className="flex items-center gap-3 flex-wrap">
-          {/* ✅ شريط البحث */}
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -121,7 +117,6 @@ const MyTasks = () => {
             />
           </div>
           
-          {/* ✅ زر الفلاتر */}
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`px-3 py-2 rounded-lg border transition-colors flex items-center gap-2 ${
@@ -137,7 +132,6 @@ const MyTasks = () => {
             )}
           </button>
           
-          {/* ✅ زر مسح الفلاتر */}
           {(searchTerm || statusFilter !== 'all' || priorityFilter !== 'all') && (
             <button
               onClick={clearFilters}
@@ -150,7 +144,6 @@ const MyTasks = () => {
         </div>
       </div>
 
-      {/* ✅ شريط الفلاتر - بدون if */}
       {showFilters && (
         <div className="mb-4 p-4 bg-gray-50 rounded-lg grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -182,7 +175,6 @@ const MyTasks = () => {
         </div>
       )}
 
-      {/* عرض عدد النتائج */}
       <p className="text-sm text-gray-500 mb-4">
         {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''}
         {searchTerm && ` matching "${searchTerm}"`}

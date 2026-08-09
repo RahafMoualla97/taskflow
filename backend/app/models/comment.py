@@ -1,9 +1,7 @@
 """
 Comment model for task discussions and user interactions.
 
-This model supports:
-- User mentions with @mentions
-- Soft deletion of comments
+Supports user mentions with @mentions and soft deletion of comments.
 """
 from sqlalchemy import Column, Integer, ForeignKey, Text, Boolean, JSON
 from sqlalchemy.orm import relationship

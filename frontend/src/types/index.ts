@@ -42,8 +42,6 @@ export interface AuthContextType {
   googleLogin: () => void;
 }
 
-// ===== الأنواع الجديدة للمشروع =====
-
 export interface Collaborator {
   id: number;
   name: string;

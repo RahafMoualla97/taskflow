@@ -1,10 +1,7 @@
 """
 User management API endpoints.
-
-This module handles user retrieval operations including:
-- Listing all active users
-- Getting a user by ID
-- Getting a user by email
+Handles user retrieval operations including listing all active users,
+getting a user by ID, and getting a user by email.
 """
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -25,14 +22,14 @@ def get_users(
 ):
     """
     Get all active users.
-
+    
     Only returns users that are not deleted and are active.
     This endpoint is used for member management.
-
+    
     Args:
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         List of active User objects
     """
@@ -51,15 +48,15 @@ def get_user_by_id(
 ):
     """
     Get a specific user by their ID.
-
+    
     Args:
-        user_id: ID of the user to retrieve
-        current_user: Authenticated user
+        user_id: The ID of the user to retrieve
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         User object
-
+    
     Raises:
         HTTPException 404: User not found
     """
@@ -85,15 +82,15 @@ def get_user_by_email(
 ):
     """
     Get a specific user by their email address.
-
+    
     Args:
-        email: Email address of the user to retrieve
-        current_user: Authenticated user
+        email: The email address of the user to retrieve
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         User object
-
+    
     Raises:
         HTTPException 404: User not found
     """

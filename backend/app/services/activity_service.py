@@ -1,10 +1,9 @@
 """
 Activity service for tracking user actions and system events.
 
-This service provides:
-- Logging activities for tasks, projects, and comments
-- Retrieving activity logs with enriched user and task data
-- Recent activity feeds for dashboard
+Provides logging of activities for tasks, projects, and comments,
+retrieving activity logs with enriched user and task data,
+and recent activity feeds for dashboard.
 """
 from sqlalchemy.orm import Session
 from typing import Optional, Dict, Any, List

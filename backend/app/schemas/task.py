@@ -1,7 +1,7 @@
 """
 Task Pydantic schemas.
 
-This module defines the request/response schemas for:
+Defines request/response schemas for:
 - Creating, updating, and managing tasks
 - Task status updates
 - Task responses with enriched data

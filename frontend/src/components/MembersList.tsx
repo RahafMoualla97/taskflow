@@ -16,7 +16,7 @@ const MembersList = ({ projectId }: { projectId: number }) => {
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('Member');
-  const [isSending, setIsSending] = useState(false); // ✅ حالة الإرسال
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     fetchMembers();
@@ -44,18 +44,16 @@ const MembersList = ({ projectId }: { projectId: number }) => {
     setIsSending(true);
 
     try {
-      const response = await apiClient.post('/invitations/', {  // ✅ أضيفي `/`
+      const response = await apiClient.post('/invitations/', {
         email: inviteEmail,
         project_id: projectId,
         role: inviteRole,
       });
       
-      console.log('✅ Invitation sent:', response.data);
       toast.success(`Invitation sent to ${inviteEmail}`);
       setInviteEmail('');
       setShowInviteForm(false);
     } catch (error: any) {
-      console.error('❌ Error:', error);
       toast.error(error.response?.data?.detail || 'Failed to send invitation');
     } finally {
       setIsSending(false);

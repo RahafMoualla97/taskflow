@@ -1,11 +1,8 @@
 """
 Dashboard service for aggregated statistics and analytics.
 
-This service provides:
-- Task statistics (by status, priority, overdue)
-- Project statistics (counts, members, tasks)
-- Dashboard overview statistics
-- Recent activity feeds
+Provides task statistics (by status, priority, overdue), project statistics
+(counts, members, tasks), dashboard overview statistics, and recent activity feeds.
 """
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -21,8 +18,6 @@ from app.models.activity import Activity
 
 class DashboardService:
     """Service for dashboard analytics and statistics."""
-
-    # ========== Legacy Methods (Backward Compatibility) ==========
 
     @staticmethod
     def get_task_stats(db: Session, user_id: int) -> Dict[str, Any]:
@@ -212,8 +207,6 @@ class DashboardService:
             "overdue": overdue,
             "by_priority": by_priority
         }
-
-    # ========== Advanced Dashboard Methods ==========
 
     @staticmethod
     def get_dashboard_stats(db: Session, user_id: int) -> Dict[str, Any]:

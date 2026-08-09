@@ -1,4 +1,3 @@
-// frontend/src/components/NotificationBell.tsx
 import { useState, useRef, useEffect } from 'react';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
@@ -24,7 +23,6 @@ const NotificationBell: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // ✅ جلب الإشعارات من API مباشرة
   const fetchNotifications = async () => {
     try {
       const res = await apiClient.get('/notifications');
@@ -40,11 +38,12 @@ const NotificationBell: React.FC = () => {
   useEffect(() => {
     fetchNotifications();
 
-    // ✅ تحديث الإشعارات كل 30 ثانية
+    // Poll for new notifications every 30 seconds
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
 
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -161,7 +160,7 @@ const NotificationBell: React.FC = () => {
             </div>
           </div>
 
-          {/* List */}
+          {/* Notification List */}
           <div className="overflow-y-auto flex-1 max-h-[400px]">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-gray-400">

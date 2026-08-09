@@ -1,7 +1,6 @@
 """
 Dashboard API endpoints.
-
-This module provides aggregated statistics and data for the user's dashboard,
+Provides aggregated statistics and data for the user's dashboard,
 including task counts, project summaries, and activity timelines.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -30,14 +29,14 @@ def get_dashboard_stats(
 ):
     """
     Get basic dashboard statistics for the current user.
-
+    
     Returns counts for: projects, total tasks, completed tasks,
     overdue tasks, and tasks assigned to the user.
-
+    
     Args:
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         Dictionary with dashboard statistics
     """
@@ -52,12 +51,12 @@ def get_recent_tasks(
 ):
     """
     Get the most recent tasks from projects the user is a member of.
-
+    
     Args:
         limit: Maximum number of tasks to return (1-20)
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         List of recent Task objects
     """
@@ -71,14 +70,14 @@ def get_overdue_tasks(
 ):
     """
     Get all overdue tasks from projects the user is a member of.
-
+    
     Tasks are considered overdue if due_date is in the past
     and status is not "Done".
-
+    
     Args:
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         List of overdue Task objects
     """
@@ -92,11 +91,11 @@ def get_my_tasks(
 ):
     """
     Get all tasks assigned to the current user (excluding completed tasks).
-
+    
     Args:
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         List of assigned Task objects
     """
@@ -110,7 +109,7 @@ def get_advanced_stats(
 ):
     """
     Get comprehensive dashboard statistics for the current user.
-
+    
     Includes:
     - Tasks breakdown by status (ToDo, InProgress, Done)
     - Tasks breakdown by priority (Low, Medium, High)
@@ -119,11 +118,11 @@ def get_advanced_stats(
     - Total task count
     - Completion rate percentage
     - Overdue task count
-
+    
     Args:
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         Dictionary with advanced dashboard statistics
     """

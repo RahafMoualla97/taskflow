@@ -78,7 +78,6 @@ const Projects = () => {
       <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-900">📁 Projects</h1>
         <div className="flex items-center gap-3 flex-wrap">
-          {/* ✅ شريط البحث */}
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -104,7 +103,6 @@ const Projects = () => {
         </div>
       </div>
 
-      {/* عرض عدد النتائج */}
       {searchTerm && (
         <p className="text-sm text-gray-500 mb-4">
           Found {filteredProjects.length} project{filteredProjects.length !== 1 ? 's' : ''}
@@ -136,7 +134,7 @@ const Projects = () => {
         </div>
       )}
 
-      {/* Modal لإنشاء المشروع */}
+      {/* Create Project Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">

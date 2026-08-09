@@ -1,10 +1,8 @@
 """
 Notification model for user alerts and system messages.
 
-This model handles:
-- Real-time user notifications (TaskAssigned, StatusChanged, etc.)
-- Read/unread status tracking
-- Action URLs for navigation
+Handles real-time user notifications (TaskAssigned, StatusChanged, etc.)
+with read/unread status tracking and action URLs for navigation.
 """
 from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, JSON
 from sqlalchemy.orm import relationship

@@ -1,7 +1,7 @@
 """
 User Pydantic schemas.
 
-This module defines the request/response schemas for:
+Defines request/response schemas for:
 - User registration and login
 - User profile responses
 - User profile updates

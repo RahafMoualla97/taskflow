@@ -2,11 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== ===== ===== ===== ===== */
-/*        TASKFLOW STYLES        */
-/* ===== ===== ===== ===== ===== */
+/* ============================================================
+   TASKFLOW CUSTOM STYLES
+   ============================================================ */
 
-/* -------- Scrollbar -------- */
+/* ------------------------------------------------------------
+   Scrollbar Styling
+   ------------------------------------------------------------ */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -26,7 +28,10 @@
   background: #a1a1a1;
 }
 
-/* -------- Mentions Input -------- */
+/* ------------------------------------------------------------
+   Mentions Input Component
+   Custom styling for react-mentions
+   ------------------------------------------------------------ */
 .mentions-input {
   width: 100%;
   position: relative;
@@ -36,11 +41,11 @@
 
 .mentions-input textarea {
   width: 100%;
-  padding: 14px 16px 56px 16px !important;   /* ✅ زيادة padding-bottom عشان الزر */
+  padding: 14px 16px 56px 16px !important;
   border: 2px solid #e5e7eb !important;
   border-radius: 16px !important;
   font-size: 14px;
-  min-height: 80px !important;                /* ✅ ارتفاع مناسب */
+  min-height: 80px !important;
   max-height: 150px !important;
   resize: vertical !important;
   outline: none !important;
@@ -71,7 +76,7 @@
   overflow-y: auto !important;
 }
 
-/* ✅ القائمة تظهر فوق الحقل */
+/* Suggestions dropdown appears above the input field */
 .mentions-input .mentions__suggestions {
   position: absolute !important;
   bottom: calc(100% + 8px) !important;
@@ -110,7 +115,9 @@
   font-weight: 600 !important;
 }
 
-/* -------- React Select Overrides -------- */
+/* ------------------------------------------------------------
+   React Select Overrides
+   ------------------------------------------------------------ */
 .react-select__control {
   border-radius: 12px !important;
   min-height: 44px !important;
@@ -141,7 +148,9 @@
   background-color: #3b82f6 !important;
 }
 
-/* -------- Animations -------- */
+/* ------------------------------------------------------------
+   Animations
+   ------------------------------------------------------------ */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -160,7 +169,9 @@
   animation: slideDown 0.25s ease-out forwards;
 }
 
-/* -------- Comment Styles -------- */
+/* ------------------------------------------------------------
+   Comment Avatar Styles
+   ------------------------------------------------------------ */
 .comment-avatar {
   width: 36px;
   height: 36px;
@@ -185,7 +196,9 @@
   flex-shrink: 0;
 }
 
-/* -------- Status Badges -------- */
+/* ------------------------------------------------------------
+   Status & Priority Badges
+   ------------------------------------------------------------ */
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -229,7 +242,9 @@
   border-color: #6ee7b7;
 }
 
-/* -------- Responsive adjustments -------- */
+/* ------------------------------------------------------------
+   Responsive Adjustments
+   ------------------------------------------------------------ */
 @media (max-width: 640px) {
   .mentions-input textarea {
     padding: 10px 12px 44px 12px !important;

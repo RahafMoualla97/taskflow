@@ -1,4 +1,3 @@
-// frontend/src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
@@ -15,15 +14,21 @@ import MyTasks from './pages/MyTasks';
 import Projects from './pages/Projects';
 import NotificationsPage from './pages/NotificationsPage';
 import TimesheetReport from './pages/TimesheetReport';
-import MembersManagement from './pages/MembersManagement'; // ✅ أضيفي هذا
+import MembersManagement from './pages/MembersManagement';
 import { Toaster } from 'react-hot-toast';
 
+/**
+ * Private route wrapper that redirects unauthenticated users to login
+ */
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return <div className="flex items-center justify-center h-screen">Loading...</div>;
   return user ? <>{children}</> : <Navigate to="/login" />;
 };
 
+/**
+ * Layout wrapper that provides the main application structure
+ */
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
   <Layout>{children}</Layout>
 );
@@ -35,11 +40,13 @@ function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
+            {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/invitations/accept" element={<InvitationAccept />} />
             
+            {/* Protected Routes - Dashboard */}
             <Route path="/" element={
               <PrivateRoute>
                 <AppLayout>
@@ -48,6 +55,7 @@ function App() {
               </PrivateRoute>
             } />
             
+            {/* Protected Routes - Project Management */}
             <Route path="/projects/:id" element={
               <PrivateRoute>
                 <AppLayout>
@@ -56,7 +64,6 @@ function App() {
               </PrivateRoute>
             } />
             
-            {/* ✅ مسار إدارة الأعضاء */}
             <Route path="/projects/:id/members" element={
               <PrivateRoute>
                 <AppLayout>
@@ -65,6 +72,7 @@ function App() {
               </PrivateRoute>
             } />
             
+            {/* Protected Routes - Task Management */}
             <Route path="/tasks/:taskId" element={
               <PrivateRoute>
                 <AppLayout>
@@ -73,6 +81,7 @@ function App() {
               </PrivateRoute>
             } />
             
+            {/* Protected Routes - User Management */}
             <Route path="/profile" element={
               <PrivateRoute>
                 <AppLayout>
@@ -89,6 +98,7 @@ function App() {
               </PrivateRoute>
             } />
             
+            {/* Protected Routes - Task Views */}
             <Route path="/my-tasks" element={
               <PrivateRoute>
                 <AppLayout>
@@ -97,6 +107,7 @@ function App() {
               </PrivateRoute>
             } />
             
+            {/* Protected Routes - Project Views */}
             <Route path="/projects" element={
               <PrivateRoute>
                 <AppLayout>
@@ -105,6 +116,7 @@ function App() {
               </PrivateRoute>
             } />
             
+            {/* Protected Routes - Notifications */}
             <Route path="/notifications" element={
               <PrivateRoute>
                 <AppLayout>
@@ -113,6 +125,7 @@ function App() {
               </PrivateRoute>
             } />
             
+            {/* Protected Routes - Reports */}
             <Route path="/timesheet-report" element={
               <PrivateRoute>
                 <AppLayout>

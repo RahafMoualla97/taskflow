@@ -1,7 +1,7 @@
 """
 Timesheet Pydantic schemas.
 
-This module defines the request/response schemas for:
+Defines request/response schemas for:
 - Logging work hours on tasks
 - Updating timesheet entries
 - Timesheet responses with user and task details

@@ -1,10 +1,8 @@
 """
 Project service for managing projects and memberships.
 
-This service handles:
-- Project CRUD operations
-- Member management (add, remove, update roles)
-- Membership reactivation (soft delete)
+Handles project CRUD operations, member management (add, remove, update roles),
+and membership reactivation (soft delete).
 """
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
@@ -19,8 +17,6 @@ from app.schemas.project import ProjectCreate, ProjectUpdate
 
 class ProjectService:
     """Service for project and membership management."""
-
-    # ========== Project CRUD ==========
 
     @staticmethod
     def create_project(
@@ -221,8 +217,6 @@ class ProjectService:
 
         project.is_deleted = True
         db.commit()
-
-    # ========== Member Management ==========
 
     @staticmethod
     def get_project_members(

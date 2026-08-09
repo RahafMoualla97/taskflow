@@ -1,7 +1,7 @@
 """
 Notification Pydantic schemas.
 
-This module defines the request/response schemas for:
+Defines request/response schemas for:
 - Notification responses with read status
 - Updating notification read status
 """

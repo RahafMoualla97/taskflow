@@ -1,4 +1,3 @@
-// frontend/src/pages/InvitationAccept.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import apiClient from '../api/client';
@@ -30,19 +29,12 @@ const InvitationAccept = () => {
     const urlToken = params.get('token');
     const authToken = params.get('auth_token');
     
-    console.log('🔑 URL Token (invitation):', urlToken);
-    console.log('🔑 Auth Token (JWT):', authToken);
-    
-    // ✅ إذا كان هناك auth_token، احفظه كـ JWT وأزل auth_token من URL
     if (authToken) {
       localStorage.setItem('token', authToken);
-      console.log('✅ Auth token saved to localStorage');
       
-      // إزالة auth_token من URL وإعادة التحميل
       const newParams = new URLSearchParams(window.location.search);
       newParams.delete('auth_token');
       const newUrl = window.location.pathname + '?' + newParams.toString();
-      console.log('🔄 Redirecting to clean URL:', newUrl);
       window.location.href = newUrl;
       return;
     }
@@ -55,12 +47,10 @@ const InvitationAccept = () => {
 
     apiClient.get(`/invitations/check?token=${urlToken}`)
       .then(res => {
-        console.log('✅ Invitation check response:', res.data);
         setInvitation(res.data);
         setLoading(false);
       })
       .catch(err => {
-        console.error('❌ Invitation check error:', err);
         const errorMsg = err.response?.data?.detail || 'Invalid or expired invitation';
         setError(errorMsg);
         setLoading(false);
@@ -69,7 +59,6 @@ const InvitationAccept = () => {
 
   useEffect(() => {
     if (user && invitation && !loading && !accepting) {
-      console.log('👤 User is logged in, auto-accepting...');
       handleAccept();
     }
   }, [user, invitation, loading]);
@@ -80,14 +69,11 @@ const InvitationAccept = () => {
     
     try {
       const urlToken = new URLSearchParams(window.location.search).get('token');
-      console.log('📤 Accepting invitation with token:', urlToken);
       
       const response = await apiClient.post(`/invitations/accept?token=${urlToken}`);
-      console.log('✅ Invitation accepted:', response.data);
       
       toast.success('🎉 Invitation accepted successfully!');
       
-      // ✅ استخدام project_id من الـ response أو من الـ invitation
       const projectId = response.data?.project_id || invitation?.project_id;
       if (projectId) {
         window.location.href = `/projects/${projectId}`;
@@ -96,7 +82,6 @@ const InvitationAccept = () => {
       }
       
     } catch (error: any) {
-      console.error('❌ Accept error:', error);
       const errorMsg = error.response?.data?.detail || 'Failed to accept invitation';
       toast.error(errorMsg);
       setError(errorMsg);
@@ -143,9 +128,7 @@ const InvitationAccept = () => {
     );
   }
 
-  // ✅ إذا كان المستخدم غير مسجل دخول
   if (!user) {
-    // ✅ استخراج التوكن من URL بشكل صحيح
     const urlToken = new URLSearchParams(window.location.search).get('token');
     
     return (
@@ -173,7 +156,6 @@ const InvitationAccept = () => {
           </p>
 
           <div className="space-y-3">
-            {/* ✅ زر إنشاء حساب جديد (الأساسي) */}
             <button
               onClick={() => {
                 const currentPath = `/invitations/accept?token=${urlToken}`;
@@ -193,7 +175,6 @@ const InvitationAccept = () => {
               </div>
             </div>
 
-            {/* ✅ زر تسجيل الدخول (خيار ثانوي) */}
             <button
               onClick={() => {
                 const currentPath = `/invitations/accept?token=${urlToken}`;
@@ -213,7 +194,6 @@ const InvitationAccept = () => {
     );
   }
 
-  // ✅ إذا كان المستخدم مسجل دخول (سيتم القبول تلقائياً)
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="bg-white p-8 rounded-lg shadow max-w-md w-full text-center">

@@ -1,11 +1,8 @@
 """
 Notification API endpoints.
-
-This module handles user notifications including:
-- Retrieving notifications (all or unread only)
-- Getting unread count
-- Marking individual or all notifications as read
-- Deleting notifications
+Handles user notifications including retrieving notifications (all or unread only),
+getting unread count, marking individual or all notifications as read,
+and deleting notifications.
 """
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -28,12 +25,12 @@ def get_notifications(
 ):
     """
     Get all notifications for the current user.
-
+    
     Args:
         unread_only: If True, only return unread notifications
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         List of Notification objects ordered by creation date (newest first)
     """
@@ -47,11 +44,11 @@ def get_unread_count(
 ):
     """
     Get the number of unread notifications for the current user.
-
+    
     Args:
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         Dictionary with unread_count
     """
@@ -67,15 +64,15 @@ def mark_notification_as_read(
 ):
     """
     Mark a specific notification as read.
-
+    
     Args:
-        notification_id: ID of the notification to mark as read
-        current_user: Authenticated user (must own the notification)
+        notification_id: The ID of the notification to mark as read
+        current_user: The authenticated user (must own the notification)
         db: Database session
-
+    
     Returns:
         The updated Notification object
-
+    
     Raises:
         HTTPException 404: Notification not found
     """
@@ -89,11 +86,11 @@ def mark_all_as_read(
 ):
     """
     Mark all notifications for the current user as read.
-
+    
     Args:
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         Success message with count of marked notifications
     """
@@ -108,15 +105,15 @@ def delete_notification(
 ):
     """
     Delete a notification.
-
+    
     Args:
-        notification_id: ID of the notification to delete
-        current_user: Authenticated user (must own the notification)
+        notification_id: The ID of the notification to delete
+        current_user: The authenticated user (must own the notification)
         db: Database session
-
+    
     Returns:
         None (204 No Content)
-
+    
     Raises:
         HTTPException 404: Notification not found
     """

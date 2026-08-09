@@ -1,11 +1,8 @@
 """
 Timesheet API endpoints.
-
-This module handles time tracking operations including:
-- Logging work hours on tasks
-- Retrieving timesheets for tasks and users
-- Weekly summary generation
-- Admin access to all timesheets
+Handles time tracking operations including logging work hours on tasks,
+retrieving timesheets for tasks and users, weekly summary generation,
+and admin access to all timesheets.
 """
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -30,18 +27,18 @@ def create_timesheet(
 ):
     """
     Log work hours on a task.
-
+    
     Regular users can only log hours for themselves.
     Admins and Owners can log hours for other users.
-
+    
     Args:
         timesheet_data: Timesheet data (task_id, date, hours, description)
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         The newly created Timesheet object
-
+    
     Raises:
         HTTPException 404: Task not found
         HTTPException 403: User is not a project member or lacks permission
@@ -57,18 +54,18 @@ def get_task_timesheets(
 ):
     """
     Get all timesheet entries for a specific task.
-
+    
     Regular users see only their own entries.
     Admins and Owners see all entries.
-
+    
     Args:
-        task_id: ID of the task
-        current_user: Authenticated user (must be a project member)
+        task_id: The ID of the task
+        current_user: The authenticated user (must be a project member)
         db: Database session
-
+    
     Returns:
         List of Timesheet entries for the task
-
+    
     Raises:
         HTTPException 404: Task not found
         HTTPException 403: User is not a project member
@@ -85,16 +82,16 @@ def get_my_timesheets(
 ):
     """
     Get timesheet entries for the current user.
-
+    
     Regular users see only their own entries.
     Admins and Owners see all entries (with optional user filtering).
-
+    
     Args:
         start_date: Optional start date filter
         end_date: Optional end date filter
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         List of Timesheet entries for the user
     """
@@ -108,13 +105,13 @@ def get_weekly_summary(
 ):
     """
     Get a weekly summary of hours for the current user.
-
+    
     The week starts on Monday and ends on Sunday.
-
+    
     Args:
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         Weekly summary including total hours and daily breakdown
     """
@@ -129,17 +126,17 @@ def delete_timesheet(
 ):
     """
     Delete a timesheet entry.
-
+    
     Users can only delete their own entries.
-
+    
     Args:
-        timesheet_id: ID of the timesheet entry
-        current_user: Authenticated user (must own the entry)
+        timesheet_id: The ID of the timesheet entry
+        current_user: The authenticated user (must own the entry)
         db: Database session
-
+    
     Returns:
         None (204 No Content)
-
+    
     Raises:
         HTTPException 404: Timesheet entry not found
     """
@@ -157,19 +154,19 @@ def get_all_timesheets(
 ):
     """
     Get all timesheet entries across the system.
-
+    
     Only Admins and Owners can access this endpoint.
-
+    
     Args:
         start_date: Optional start date filter
         end_date: Optional end date filter
         user_id: Optional user ID filter (to view specific user's entries)
-        current_user: Authenticated user (must be Admin or Owner)
+        current_user: The authenticated user (must be Admin or Owner)
         db: Database session
-
+    
     Returns:
         List of all Timesheet entries
-
+    
     Raises:
         HTTPException 403: User is not an Admin or Owner
     """

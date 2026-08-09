@@ -1,11 +1,8 @@
 """
 Project model for managing work spaces and task collections.
 
-This model handles:
-- Project creation and metadata
-- Unique project key generation
-- Soft deletion support
-- Relationships to members, tasks, and activities
+Handles project creation and metadata, unique project key generation,
+soft deletion support, and relationships to members, tasks, and activities.
 """
 from sqlalchemy import Column, String, Integer, ForeignKey, Boolean
 from sqlalchemy.orm import relationship

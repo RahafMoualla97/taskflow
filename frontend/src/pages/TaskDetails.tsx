@@ -105,6 +105,9 @@ const TaskDetails = () => {
     fetchTaskDetails();
   }, [taskId]);
 
+  /**
+   * Fetch all task details including project info, members, activities, and comments
+   */
   const fetchTaskDetails = async () => {
     try {
       const taskRes = await apiClient.get(`/tasks/${taskId}`);
@@ -147,15 +150,21 @@ const TaskDetails = () => {
     }
   };
 
+  /**
+   * Fetch activity logs for the task
+   */
   const fetchActivities = async (taskId: number) => {
     try {
       const res = await apiClient.get(`/activities/task/${taskId}?limit=50`);
       setActivities(res.data);
     } catch (error) {
-      console.error('Failed to fetch activities:', error);
+      // Silently handle activity fetch failure
     }
   };
 
+  /**
+   * Fetch comments for the task, sorted newest first
+   */
   const fetchComments = async (taskId: number) => {
     try {
       const res = await apiClient.get(`/comments/task/${taskId}`);
@@ -164,10 +173,13 @@ const TaskDetails = () => {
       );
       setComments(sorted);
     } catch (error) {
-      console.error('Failed to fetch comments:', error);
+      // Silently handle comment fetch failure
     }
   };
 
+  /**
+   * Format date string into human-readable relative time
+   */
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -183,6 +195,9 @@ const TaskDetails = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  /**
+   * Fetch users for mention suggestions in comments
+   */
   const getMentionUsers = async (query: string, callback: any) => {
     try {
       const res = await apiClient.get(`/projects/${task?.project_id}/members`);
@@ -202,6 +217,9 @@ const TaskDetails = () => {
     }
   };
 
+  /**
+   * Render @mentions in comment text with special styling
+   */
   const renderMentions = (text: string) => {
     return text.replace(
       /@\[([^\]]+)\]\((\d+)\)/g,
@@ -209,6 +227,9 @@ const TaskDetails = () => {
     );
   };
 
+  /**
+   * Add a new comment to the task with mention support
+   */
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) {
@@ -245,6 +266,9 @@ const TaskDetails = () => {
     }
   };
 
+  /**
+   * Delete a comment (author or admin only)
+   */
   const deleteComment = async (commentId: number) => {
     if (!window.confirm('Are you sure you want to delete this comment?')) return;
     try {
@@ -256,6 +280,9 @@ const TaskDetails = () => {
     }
   };
 
+  /**
+   * Render all comments with author avatars and mention highlighting
+   */
   const renderComments = () => {
     if (comments.length === 0) {
       return (
@@ -302,6 +329,9 @@ const TaskDetails = () => {
     );
   };
 
+  /**
+   * Update task details
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -325,6 +355,9 @@ const TaskDetails = () => {
     }
   };
 
+  /**
+   * Update task status with validation
+   */
   const handleStatusChange = async (newStatus: 'ToDo' | 'InProgress' | 'Done') => {
     try {
       const response = await apiClient.patch(`/tasks/${taskId}/status`, { status: newStatus });
@@ -337,6 +370,9 @@ const TaskDetails = () => {
     }
   };
 
+  /**
+   * Delete the task
+   */
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this task?')) return;
     try {
@@ -348,6 +384,9 @@ const TaskDetails = () => {
     }
   };
 
+  /**
+   * Add a collaborator to the task
+   */
   const handleAddCollaborator = async () => {
     if (!collaboratorEmail) {
       toast.error('Please enter an email address');
@@ -365,6 +404,9 @@ const TaskDetails = () => {
     }
   };
 
+  /**
+   * Add a watcher to the task
+   */
   const handleAddWatcher = async () => {
     if (!watcherEmail) {
       toast.error('Please enter an email address');
@@ -382,6 +424,9 @@ const TaskDetails = () => {
     }
   };
 
+  /**
+   * Get priority color for styling
+   */
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'High': return 'bg-red-100 text-red-700 border-red-200';
@@ -391,6 +436,9 @@ const TaskDetails = () => {
     }
   };
 
+  /**
+   * Get status color for styling
+   */
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Done': return 'bg-green-100 text-green-800';
@@ -446,6 +494,7 @@ const TaskDetails = () => {
     <div className="min-h-screen bg-gray-50 py-6">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
+        {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-3 mb-6 text-sm">
           <Link
             to={`/projects/${task.project_id}`}
@@ -462,6 +511,7 @@ const TaskDetails = () => {
 
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           
+          {/* Task Header */}
           <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white">
             <div className="flex justify-between items-start flex-wrap gap-4">
               <div className="flex-1 min-w-0">
@@ -522,6 +572,7 @@ const TaskDetails = () => {
             </div>
           </div>
 
+          {/* Tab Navigation */}
           <div className="border-b border-gray-200 bg-gray-50/50 px-6">
             <nav className="flex gap-1 -mb-px">
               {(['details', 'comments', 'activity', 'timesheet'] as const).map((tab) => (
@@ -547,8 +598,10 @@ const TaskDetails = () => {
             </nav>
           </div>
 
+          {/* Content Area */}
           <div className="p-6">
             
+            {/* Details Tab */}
             {activeTab === 'details' && (
               <>
                 {editing ? (
@@ -688,6 +741,7 @@ const TaskDetails = () => {
                   </form>
                 ) : (
                   <div className="space-y-6">
+                    {/* Status and Priority */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="bg-gray-50 rounded-xl p-4">
                         <h3 className="text-sm font-medium text-gray-500 mb-2">Status</h3>
@@ -716,6 +770,7 @@ const TaskDetails = () => {
                       </div>
                     </div>
 
+                    {/* Description */}
                     {task.description && (
                       <div className="bg-gray-50 rounded-xl p-4">
                         <h3 className="text-sm font-medium text-gray-500 mb-2">Description</h3>
@@ -723,6 +778,7 @@ const TaskDetails = () => {
                       </div>
                     )}
 
+                    {/* Assignee & Reporter */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="bg-gray-50 rounded-xl p-4">
                         <h3 className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-1">
@@ -738,6 +794,7 @@ const TaskDetails = () => {
                       </div>
                     </div>
 
+                    {/* Time Tracking */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="bg-gray-50 rounded-xl p-4">
                         <h3 className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-1">
@@ -759,6 +816,7 @@ const TaskDetails = () => {
                       </div>
                     </div>
 
+                    {/* Collaborators & Watchers */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="bg-gray-50 rounded-xl p-4">
                         <div className="flex justify-between items-center mb-2">
@@ -848,6 +906,7 @@ const TaskDetails = () => {
               </>
             )}
 
+            {/* Comments Tab */}
             {activeTab === 'comments' && (
               <div className="flex flex-col h-full">
                 <div className="flex-shrink-0 mb-4 relative" style={{ overflow: 'visible' }}>
@@ -936,6 +995,7 @@ const TaskDetails = () => {
               </div>
             )}
 
+            {/* Activity Tab */}
             {activeTab === 'activity' && (
               <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
                 {activities.length === 0 ? (
@@ -969,6 +1029,7 @@ const TaskDetails = () => {
               </div>
             )}
 
+            {/* Timesheet Tab */}
             {activeTab === 'timesheet' && (
               <div>
                 <Timesheet taskId={task.id} projectId={task.project_id} />

@@ -132,7 +132,7 @@ const MembersManagement = () => {
         </button>
       </div>
 
-      {/* قائمة الأعضاء */}
+      {/* Members Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50 border-b">
@@ -188,7 +188,7 @@ const MembersManagement = () => {
         </table>
       </div>
 
-      {/* Modal إضافة عضو */}
+      {/* Add Member Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">

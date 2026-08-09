@@ -1,11 +1,9 @@
 """
 User model for authentication and profile management.
 
-This model handles:
-- User authentication (email/password and OAuth)
-- Profile information (name, avatar)
-- Account status (active, deleted)
-- Relationships to projects, tasks, comments, and more
+Handles user authentication (email/password and OAuth), profile information
+(name, avatar), account status (active, deleted), and relationships to
+projects, tasks, comments, and other entities.
 """
 from sqlalchemy import Column, String, Boolean
 from sqlalchemy.orm import relationship

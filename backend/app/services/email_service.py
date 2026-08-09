@@ -22,12 +22,21 @@ class EmailService:
     ) -> bool:
         """
         Send an email via Maileroo HTTP API.
+
+        Args:
+            to_email: Recipient email address
+            subject: Email subject line
+            html_content: HTML email body
+            from_email: Optional sender email (defaults to configured FROM_EMAIL)
+
+        Returns:
+            True if successful, False otherwise
         """
         try:
-            logger.info(f"📧 [MAILEROO_API] Attempting to send email to {to_email}")
+            logger.info(f"Sending email to {to_email}")
 
             if not settings.MAILEROO_API_KEY:
-                logger.error("❌ MAILEROO_API_KEY is not set")
+                logger.error("MAILEROO_API_KEY is not set")
                 return False
 
             API_URL = "https://smtp.maileroo.com/api/v2/emails"
@@ -56,14 +65,14 @@ class EmailService:
             response = requests.post(API_URL, json=payload, headers=headers, timeout=30)
 
             if response.status_code in [200, 201]:
-                logger.info(f"✅ Email sent successfully to {to_email}")
+                logger.info(f"Email sent successfully to {to_email}")
                 return True
             else:
-                logger.error(f"❌ Failed to send email: {response.text}")
+                logger.error(f"Failed to send email: {response.text}")
                 return False
 
         except Exception as e:
-            logger.error(f"❌ Email send failed: {e}")
+            logger.error(f"Email send failed: {e}")
             return False
 
     @staticmethod
@@ -75,6 +84,15 @@ class EmailService:
     ) -> bool:
         """
         Send a project invitation email.
+
+        Args:
+            to_email: Recipient email address
+            token: Invitation token for acceptance URL
+            project_name: Name of the project
+            inviter_name: Name of the user who sent the invitation
+
+        Returns:
+            True if successful, False otherwise
         """
         accept_url = f"{settings.FRONTEND_URL}/invitations/accept?token={token}"
         subject = f"Invitation to join {project_name} on TaskFlow"
@@ -129,6 +147,15 @@ class EmailService:
     ) -> bool:
         """
         Send a task assignment notification email.
+
+        Args:
+            to_email: Recipient email address
+            task_title: Title of the assigned task
+            project_name: Name of the project
+            assigner_name: Name of the user who assigned the task
+
+        Returns:
+            True if successful, False otherwise
         """
         subject = f"New task assigned: {task_title}"
         task_url = f"{settings.FRONTEND_URL}/tasks"

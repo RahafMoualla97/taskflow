@@ -1,4 +1,3 @@
-// frontend/src/pages/Register.tsx
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '../api/client';
@@ -21,7 +20,6 @@ const Register = () => {
       toast.success('Account created successfully! Please login.');
       navigate(`/login?return_url=${encodeURIComponent(returnUrl)}`);
     } catch (error: any) {
-      // ✅ معالجة الأخطاء بشكل صحيح
       const errorData = error.response?.data;
       
       if (errorData && typeof errorData === 'object') {

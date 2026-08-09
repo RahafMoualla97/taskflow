@@ -47,6 +47,9 @@ const TimesheetReport = () => {
     fetchTimesheets();
   }, [viewMode, currentDate]);
 
+  /**
+   * Format a Date object to YYYY-MM-DD string
+   */
   const formatDateToYYYYMMDD = (date: Date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -54,6 +57,9 @@ const TimesheetReport = () => {
     return `${year}-${month}-${day}`;
   };
 
+  /**
+   * Get the start and end dates for the current month
+   */
   const getMonthRange = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -67,6 +73,9 @@ const TimesheetReport = () => {
     return { startDate, endDate };
   };
 
+  /**
+   * Get the start and end dates for the current week (Monday to Sunday)
+   */
   const getWeekRange = (date: Date) => {
     const start = new Date(date);
     start.setDate(date.getDate() - date.getDay());
@@ -79,6 +88,9 @@ const TimesheetReport = () => {
     return { startDate, endDate };
   };
 
+  /**
+   * Fetch timesheet entries for the selected date range
+   */
   const fetchTimesheets = async () => {
     setLoading(true);
     try {
@@ -95,14 +107,11 @@ const TimesheetReport = () => {
         endDate = range.endDate;
       }
 
-      console.log('📡 Fetching timesheets:', { viewMode, startDate, endDate });
-
       const res = await apiClient.get('/timesheets/my', {
         params: { start_date: startDate, end_date: endDate }
       });
       
-      console.log('📡 Response data:', res.data);
-      
+      // Enrich entries with project and user details
       const entriesWithData = await Promise.all(
         res.data.map(async (entry: any) => {
           try {
@@ -119,7 +128,7 @@ const TimesheetReport = () => {
               userEmail = userRes.data.email;
               userName = userRes.data.name;
             } catch {
-              // إذا فشل جلب المستخدم
+              // User fetch failed, use defaults
             }
             
             return {
@@ -144,13 +153,15 @@ const TimesheetReport = () => {
       setEntries(entriesWithData);
       processData(entriesWithData);
     } catch (error) {
-      console.error('❌ Error fetching timesheets:', error);
       toast.error('Failed to load timesheet report');
     } finally {
       setLoading(false);
     }
   };
 
+  /**
+   * Process entries into daily summaries
+   */
   const processData = (data: TimesheetEntry[]) => {
     const dailyMap: { [key: string]: TimesheetEntry[] } = {};
     let total = 0;
@@ -176,6 +187,9 @@ const TimesheetReport = () => {
     setTotalHours(total);
   };
 
+  /**
+   * Export data to Excel (.xlsx) format
+   */
   const exportToExcel = () => {
     if (entries.length === 0) {
       toast.error('No data to export');
@@ -221,6 +235,9 @@ const TimesheetReport = () => {
     setShowExportMenu(false);
   };
 
+  /**
+   * Export data to CSV format
+   */
   const exportToCSV = () => {
     if (entries.length === 0) {
       toast.error('No data to export');
@@ -244,6 +261,10 @@ const TimesheetReport = () => {
     setShowExportMenu(false);
   };
 
+  /**
+   * Import timesheet entries from Excel or CSV file
+   * Supports multiple date formats and automatic field mapping
+   */
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -254,6 +275,7 @@ const TimesheetReport = () => {
         const data = event.target?.result;
         let importedEntries: any[] = [];
 
+        // Parse file based on extension
         if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
           const workbook = XLSX.read(data, { type: 'array' });
           const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -282,6 +304,7 @@ const TimesheetReport = () => {
         const errors: string[] = [];
         let missingFieldsCount = 0;
 
+        // Process each imported entry
         for (const [index, entry] of importedEntries.entries()) {
           try {
             const rowNumber = index + 2;
@@ -298,6 +321,7 @@ const TimesheetReport = () => {
             const taskId = entry['Task ID'];
             const taskName = entry['Task Name']?.trim();
 
+            // Validate required fields
             if (!userId && !userEmail && !userName) {
               missingFields.push('User ID / User Email / User Name');
             }
@@ -318,6 +342,7 @@ const TimesheetReport = () => {
               continue;
             }
 
+            // Find project by ID or name
             let project = null;
 
             if (projectId && projectId !== 'N/A') {
@@ -325,7 +350,7 @@ const TimesheetReport = () => {
                 const projectRes = await apiClient.get(`/projects/${projectId}`);
                 project = projectRes.data;
               } catch {
-                // إذا لم نجد، نبحث بالاسم
+                // Project not found by ID, try by name
               }
             }
 
@@ -344,6 +369,7 @@ const TimesheetReport = () => {
               continue;
             }
 
+            // Find task by ID or name within the project
             let task = null;
 
             if (taskId) {
@@ -351,7 +377,7 @@ const TimesheetReport = () => {
                 const taskRes = await apiClient.get(`/tasks/${taskId}`);
                 task = taskRes.data;
               } catch {
-                // إذا لم نجد، نبحث بالاسم
+                // Task not found by ID, try by name
               }
             }
 
@@ -369,6 +395,7 @@ const TimesheetReport = () => {
               continue;
             }
 
+            // Find target user by ID, email, or name
             let targetUserId = null;
 
             if (userId && userId !== 'N/A') {
@@ -378,7 +405,7 @@ const TimesheetReport = () => {
                   targetUserId = userRes.data.id;
                 }
               } catch {
-                // إذا لم نجد
+                // User not found
               }
             }
 
@@ -392,7 +419,7 @@ const TimesheetReport = () => {
                   targetUserId = foundUser.id;
                 }
               } catch {
-                // إذا لم نجد
+                // User not found
               }
             }
 
@@ -413,21 +440,24 @@ const TimesheetReport = () => {
                   targetUserId = foundUser.id;
                 }
               } catch {
-                // إذا لم نجد
+                // User not found
               }
             }
 
+            // Fallback to current user if no user found
             if (!targetUserId) {
               const meRes = await apiClient.get('/auth/users/me');
               targetUserId = meRes.data.id;
             }
 
+            // Parse date with multiple format support
             let dateValue = entry['Date'] || entry['date'];
             let formattedDate = new Date().toISOString().split('T')[0];
 
             if (dateValue) {
               let parsedDate = null;
 
+              // Handle Excel numeric date format
               if (typeof dateValue === 'number') {
                 const excelDate = new Date((dateValue - 25569) * 86400 * 1000);
                 if (!isNaN(excelDate.getTime())) {
@@ -436,6 +466,7 @@ const TimesheetReport = () => {
               } else {
                 const dateStr = String(dateValue).trim();
 
+                // Try multiple date formats
                 const formats = [
                   /^(\d{4})-(\d{2})-(\d{2})/,
                   /^(\d{2})\/(\d{2})\/(\d{4})/,
@@ -457,6 +488,7 @@ const TimesheetReport = () => {
                   }
                 }
 
+                // Fallback to native Date parsing
                 if (!parsedDate) {
                   const d = new Date(dateStr);
                   if (!isNaN(d.getTime())) {
@@ -470,6 +502,7 @@ const TimesheetReport = () => {
               }
             }
 
+            // Parse hours
             let hours = parseFloat(entry['Hours'] || entry['hours'] || 0);
             if (isNaN(hours) || hours <= 0) {
               errors.push(`Row ${rowNumber}: Invalid hours "${entry['Hours']}"`);
@@ -479,6 +512,7 @@ const TimesheetReport = () => {
 
             const description = entry['Description'] || entry['description'] || '';
 
+            // Create the timesheet entry
             await apiClient.post('/timesheets', {
               task_id: task.id,
               user_id: targetUserId,
@@ -489,12 +523,12 @@ const TimesheetReport = () => {
 
             successCount++;
           } catch (err) {
-            console.error('Import error for entry:', entry, err);
             errors.push(`Row ${index + 2}: ${err instanceof Error ? err.message : 'Unknown error'}`);
             errorCount++;
           }
         }
 
+        // Display import results
         let message = '';
         if (successCount > 0 && errorCount === 0) {
           message = `✅ Imported ${successCount} entries successfully!`;
@@ -507,16 +541,9 @@ const TimesheetReport = () => {
           toast.error(message, { duration: 8000 });
         }
 
-        console.log('📊 Import Summary:', {
-          success: successCount,
-          failed: errorCount,
-          errors: errors,
-          missingFields: missingFieldsCount
-        });
-
+        // Refresh the timesheet data
         fetchTimesheets();
       } catch (error) {
-        console.error('Import error:', error);
         toast.error('Failed to import file');
       }
     };
@@ -532,6 +559,9 @@ const TimesheetReport = () => {
     }
   };
 
+  /**
+   * Get the display range string based on view mode
+   */
   const getDisplayRange = () => {
     if (viewMode === 'week') {
       const { startDate, endDate } = getWeekRange(currentDate);
@@ -542,6 +572,9 @@ const TimesheetReport = () => {
     }
   };
 
+  /**
+   * Navigate to previous week/month
+   */
   const navigatePrevious = () => {
     const newDate = new Date(currentDate);
     if (viewMode === 'week') {
@@ -552,6 +585,9 @@ const TimesheetReport = () => {
     setCurrentDate(newDate);
   };
 
+  /**
+   * Navigate to next week/month
+   */
   const navigateNext = () => {
     const newDate = new Date(currentDate);
     if (viewMode === 'week') {
@@ -562,10 +598,16 @@ const TimesheetReport = () => {
     setCurrentDate(newDate);
   };
 
+  /**
+   * Jump to today
+   */
   const goToToday = () => {
     setCurrentDate(new Date());
   };
 
+  /**
+   * Format date for display
+   */
   const formatDateDisplay = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       weekday: 'short',
@@ -585,6 +627,7 @@ const TimesheetReport = () => {
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
+      {/* Header */}
       <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         <div className="flex items-center gap-3">
           <CalendarIcon className="w-6 h-6 text-blue-600" />
@@ -604,7 +647,9 @@ const TimesheetReport = () => {
         </div>
       </div>
 
+      {/* Controls Bar */}
       <div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-gray-50 rounded-xl">
+        {/* View Mode Toggle */}
         <div className="flex gap-1 border border-gray-200 rounded-lg overflow-hidden">
           <button
             onClick={() => setViewMode('week')}
@@ -624,6 +669,7 @@ const TimesheetReport = () => {
           </button>
         </div>
 
+        {/* Date Navigation */}
         <div className="flex items-center gap-2">
           <button
             onClick={navigatePrevious}
@@ -650,6 +696,7 @@ const TimesheetReport = () => {
 
         <div className="flex-1"></div>
 
+        {/* Export Button */}
         <div className="relative">
           <button
             onClick={() => setShowExportMenu(!showExportMenu)}
@@ -677,6 +724,7 @@ const TimesheetReport = () => {
           )}
         </div>
 
+        {/* Import Button */}
         <div>
           <input
             ref={fileInputRef}
@@ -696,6 +744,7 @@ const TimesheetReport = () => {
         </div>
       </div>
 
+      {/* Daily Summary */}
       {dailySummary.length === 0 ? (
         <div className="text-center py-12 text-gray-400">
           <CalendarIcon className="w-12 h-12 mx-auto mb-2 opacity-30" />

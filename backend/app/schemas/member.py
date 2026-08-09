@@ -1,7 +1,7 @@
 """
 ProjectMember Pydantic schemas.
 
-This module defines the request/response schemas for:
+Defines request/response schemas for:
 - Adding members to projects
 - Updating member roles
 - Member responses with user details

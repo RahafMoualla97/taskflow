@@ -1,5 +1,8 @@
 """
 Tests for timesheet endpoints.
+
+Covers creating, retrieving, and deleting timesheet entries,
+as well as weekly summary generation.
 """
 from fastapi import status
 from datetime import date, timedelta
@@ -29,7 +32,7 @@ def test_create_timesheet(client, db_session, auth_headers, test_user, test_task
 
 
 def test_get_task_timesheets(client, db_session, auth_headers, test_user, test_task):
-    """Test getting timesheets for a task."""
+    """Test retrieving timesheets for a task."""
     response = client.get(
         f"/api/v1/timesheets/task/{test_task.id}",
         headers=auth_headers
@@ -41,7 +44,7 @@ def test_get_task_timesheets(client, db_session, auth_headers, test_user, test_t
 
 
 def test_get_my_timesheets(client, db_session, auth_headers, test_user):
-    """Test getting user's timesheets."""
+    """Test retrieving the current user's timesheets."""
     response = client.get(
         "/api/v1/timesheets/my",
         headers=auth_headers
@@ -53,7 +56,7 @@ def test_get_my_timesheets(client, db_session, auth_headers, test_user):
 
 
 def test_get_weekly_summary(client, db_session, auth_headers, test_user):
-    """Test getting weekly summary."""
+    """Test retrieving weekly summary of hours."""
     response = client.get(
         "/api/v1/timesheets/weekly-summary",
         headers=auth_headers
@@ -69,7 +72,6 @@ def test_get_weekly_summary(client, db_session, auth_headers, test_user):
 
 def test_delete_timesheet(client, db_session, auth_headers, test_user, test_task):
     """Test deleting a timesheet entry."""
-    # Create a timesheet first
     today = date.today()
     timesheet = Timesheet(
         task_id=test_task.id,
@@ -89,6 +91,5 @@ def test_delete_timesheet(client, db_session, auth_headers, test_user, test_task
     
     assert response.status_code == status.HTTP_204_NO_CONTENT
     
-    # Verify timesheet is deleted
     deleted = db_session.query(Timesheet).filter(Timesheet.id == timesheet.id).first()
     assert deleted is None

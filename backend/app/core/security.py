@@ -1,7 +1,7 @@
 """
 Security utilities for password hashing and JWT token management.
 
-This module provides:
+Provides:
 - Password hashing and verification using bcrypt
 - JWT access token creation and decoding
 """

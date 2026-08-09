@@ -1,10 +1,8 @@
 """
 Timesheet model for tracking work hours on tasks.
 
-This model handles:
-- Logging work hours for specific tasks
-- User attribution for time entries
-- Date-based tracking and description
+Handles logging work hours for specific tasks with user attribution,
+date-based tracking, and optional description of work performed.
 """
 from sqlalchemy import Column, Integer, ForeignKey, Float, Text, Date
 from sqlalchemy.orm import relationship

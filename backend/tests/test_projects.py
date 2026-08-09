@@ -1,5 +1,8 @@
 """
 Tests for project endpoints.
+
+Covers CRUD operations, member access control,
+and project search functionality.
 """
 from fastapi import status
 from app.models.project import Project
@@ -27,7 +30,7 @@ def test_create_project(client, db_session, auth_headers, test_user):
 
 
 def test_get_projects(client, db_session, auth_headers, test_user, test_project):
-    """Test getting user's projects."""
+    """Test retrieving the user's projects."""
     response = client.get(
         "/api/v1/projects/",
         headers=auth_headers
@@ -40,7 +43,7 @@ def test_get_projects(client, db_session, auth_headers, test_user, test_project)
 
 
 def test_get_project_by_id(client, db_session, auth_headers, test_user, test_project):
-    """Test getting a specific project by ID."""
+    """Test retrieving a specific project by ID."""
     response = client.get(
         f"/api/v1/projects/{test_project.id}",
         headers=auth_headers
@@ -54,8 +57,7 @@ def test_get_project_by_id(client, db_session, auth_headers, test_user, test_pro
 
 
 def test_get_project_not_member(client, db_session, auth_headers, test_user2, test_project):
-    """Test getting a project user is not a member of."""
-    # Create token for test_user2
+    """Test accessing a project the user is not a member of."""
     from app.core.security import create_access_token
     token2 = create_access_token(data={"sub": test_user2.email, "user_id": test_user2.id})
     
@@ -93,13 +95,12 @@ def test_delete_project(client, db_session, auth_headers, test_user, test_projec
     
     assert response.status_code == status.HTTP_204_NO_CONTENT
     
-    # Verify project is soft deleted
     project = db_session.query(Project).filter(Project.id == test_project.id).first()
     assert project.is_deleted == True
 
 
 def test_search_projects(client, db_session, auth_headers, test_user, test_project):
-    """Test searching for projects."""
+    """Test searching for projects by name or description."""
     response = client.get(
         f"/api/v1/projects/search?q=Test",
         headers=auth_headers

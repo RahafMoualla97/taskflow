@@ -1,4 +1,3 @@
-// frontend/src/pages/ProjectBoard.tsx
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -6,7 +5,6 @@ import apiClient from '../api/client';
 import toast from 'react-hot-toast';
 import MembersList from '../components/MembersList';
 import Select from 'react-select';
-// ✅ استيراد من @hello-pangea/dnd بدلاً من react-beautiful-dnd
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { ArrowLeftIcon, TrashIcon, PlusIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 
@@ -90,7 +88,6 @@ const ProjectBoard = () => {
     }
   };
 
-  // ✅ حذف المشروع
   const handleDeleteProject = async () => {
     if (!user || project?.owner_id !== user.id) {
       toast.error('Only the project owner can delete this project');
@@ -111,7 +108,6 @@ const ProjectBoard = () => {
     }
   };
 
-  // ✅ Drag & Drop - معالجة السحب والإفلات
   const onDragEnd = async (result: any) => {
     const { destination, source, draggableId } = result;
     
@@ -127,7 +123,7 @@ const ProjectBoard = () => {
     const taskId = parseInt(draggableId);
     const newStatus = destination.droppableId as 'ToDo' | 'InProgress' | 'Done';
 
-    // تحديث الواجهة محلياً (Optimistic Update)
+    // Optimistic UI update
     setTasks(prevTasks =>
       prevTasks.map(task =>
         task.id === taskId ? { ...task, status: newStatus } : task
@@ -144,7 +140,6 @@ const ProjectBoard = () => {
     }
   };
 
-  // إنشاء مهمة جديدة
   const createTask = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -173,7 +168,6 @@ const ProjectBoard = () => {
     }
   };
 
-  // حذف مهمة
   const deleteTask = async (taskId: number) => {
     if (!window.confirm('Are you sure you want to delete this task?')) return;
     try {
@@ -227,10 +221,9 @@ const ProjectBoard = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Header مع أزرار التنقل والحذف */}
+        {/* Header with Navigation and Actions */}
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
           <div className="flex items-center gap-3">
-            {/* ✅ زر العودة إلى المشاريع */}
             <Link
               to="/projects"
               className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
@@ -259,7 +252,6 @@ const ProjectBoard = () => {
               </button>
             )}
             
-            {/* ✅ زر إدارة الأعضاء (جديد) */}
             <Link
               to={`/projects/${id}/members`}
               className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center gap-2"
@@ -278,12 +270,12 @@ const ProjectBoard = () => {
           </div>
         </div>
 
-        {/* قائمة الأعضاء */}
+        {/* Members List */}
         <div className="mb-6">
           <MembersList projectId={Number(id)} />
         </div>
 
-        {/* نموذج إنشاء مهمة */}
+        {/* Create Task Form */}
         {showTaskForm && (
           <div className="bg-white rounded-lg shadow p-6 mb-8">
             <h2 className="text-xl font-semibold mb-4">Create New Task</h2>
@@ -369,7 +361,7 @@ const ProjectBoard = () => {
           </div>
         )}
 
-        {/* ✅ Kanban Board مع Drag & Drop باستخدام @hello-pangea/dnd */}
+        {/* Kanban Board with Drag & Drop */}
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {(['ToDo', 'InProgress', 'Done'] as const).map((status) => (
@@ -479,7 +471,7 @@ const ProjectBoard = () => {
         </DragDropContext>
       </div>
 
-      {/* Modal تأكيد حذف المشروع */}
+      {/* Delete Project Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">

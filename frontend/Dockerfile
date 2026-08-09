@@ -2,23 +2,25 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# نسخ package files
+# Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
 
-# نسخ المصادر وبناء التطبيق
+# Copy source code and build the application
 COPY . .
 RUN npm run build
 
-# ===== مرحلة الإنتاج =====
+# Production Stage
 FROM nginx:alpine
 
-# نسخ ملفات البناء
+# Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# نسخ إعدادات Nginx
+# Copy Nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Expose port 80 for web traffic
 EXPOSE 80
 
+# Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]

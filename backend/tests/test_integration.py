@@ -1,12 +1,16 @@
 """
 Integration tests covering multiple components.
+
+Tests end-to-end workflows involving projects, tasks,
+comments, timesheets, and dashboard statistics.
 """
 from fastapi import status
 
 
 def test_complete_workflow(client, db_session, auth_headers, test_user, test_user2):
-    """Test a complete workflow: project creation -> task -> comment -> timesheet."""
-    
+    """
+    Test a complete workflow: project creation -> task -> comment -> timesheet.
+    """
     # 1. Create a project
     response = client.post(
         "/api/v1/projects/",

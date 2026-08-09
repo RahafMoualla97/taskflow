@@ -1,5 +1,8 @@
 """
 Tests for comment endpoints.
+
+Covers adding comments, retrieving task comments,
+and soft deleting comments.
 """
 from fastapi import status
 from app.models.comment import Comment
@@ -24,7 +27,7 @@ def test_add_comment(client, db_session, auth_headers, test_user, test_task):
 
 
 def test_get_task_comments(client, db_session, auth_headers, test_user, test_task, test_comment):
-    """Test getting all comments for a task."""
+    """Test retrieving all comments for a task."""
     response = client.get(
         f"/api/v1/comments/task/{test_task.id}",
         headers=auth_headers
@@ -46,13 +49,12 @@ def test_delete_comment(client, db_session, auth_headers, test_user, test_commen
     
     assert response.status_code == status.HTTP_204_NO_CONTENT
     
-    # Verify comment is soft deleted
     comment = db_session.query(Comment).filter(Comment.id == test_comment.id).first()
     assert comment.is_deleted == True
 
 
 def test_add_comment_with_mentions(client, db_session, auth_headers, test_user, test_user2, test_task):
-    """Test adding a comment with mentions."""
+    """Test adding a comment with user mentions."""
     response = client.post(
         f"/api/v1/comments/task/{test_task.id}",
         json={

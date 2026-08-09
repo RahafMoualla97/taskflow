@@ -1,11 +1,14 @@
 """
 Tests for dashboard endpoints.
+
+Covers statistics, recent tasks, overdue tasks,
+and advanced analytics.
 """
 from fastapi import status
 
 
 def test_get_dashboard_stats(client, db_session, auth_headers, test_user, test_project, test_task):
-    """Test getting dashboard statistics."""
+    """Test retrieving dashboard statistics."""
     response = client.get(
         "/api/v1/dashboard/stats",
         headers=auth_headers
@@ -23,7 +26,7 @@ def test_get_dashboard_stats(client, db_session, auth_headers, test_user, test_p
 
 
 def test_get_recent_tasks(client, db_session, auth_headers, test_user, test_project, test_task):
-    """Test getting recent tasks."""
+    """Test retrieving recent tasks."""
     response = client.get(
         "/api/v1/dashboard/tasks/recent?limit=5",
         headers=auth_headers
@@ -36,7 +39,7 @@ def test_get_recent_tasks(client, db_session, auth_headers, test_user, test_proj
 
 
 def test_get_overdue_tasks(client, db_session, auth_headers, test_user):
-    """Test getting overdue tasks (should be empty initially)."""
+    """Test retrieving overdue tasks (should be empty initially)."""
     response = client.get(
         "/api/v1/dashboard/tasks/overdue",
         headers=auth_headers
@@ -44,12 +47,11 @@ def test_get_overdue_tasks(client, db_session, auth_headers, test_user):
     
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
-    # Should be empty or contain only overdue tasks
     assert isinstance(data, list)
 
 
 def test_get_my_tasks(client, db_session, auth_headers, test_user, test_task):
-    """Test getting tasks assigned to the user."""
+    """Test retrieving tasks assigned to the current user."""
     response = client.get(
         "/api/v1/dashboard/tasks/my",
         headers=auth_headers
@@ -62,7 +64,7 @@ def test_get_my_tasks(client, db_session, auth_headers, test_user, test_task):
 
 
 def test_get_advanced_stats(client, db_session, auth_headers, test_user, test_project, test_task):
-    """Test getting advanced dashboard statistics."""
+    """Test retrieving advanced dashboard statistics."""
     response = client.get(
         "/api/v1/dashboard/advanced-stats",
         headers=auth_headers

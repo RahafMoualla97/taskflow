@@ -1,7 +1,7 @@
 """
 Comment Pydantic schemas.
 
-This module defines the request/response schemas for:
+Defines request/response schemas for:
 - Creating comments with mentions
 - Updating comments
 - Comment responses with author information

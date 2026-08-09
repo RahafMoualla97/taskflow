@@ -1,8 +1,6 @@
 """
 Authentication API endpoints.
-
-This module handles user registration, login (email/password and Google OAuth),
-and user profile management.
+Handles user registration, login (email/password and Google OAuth), and user profile management.
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
 from fastapi.security import OAuth2PasswordRequestForm
@@ -23,8 +21,6 @@ from app.models.user import User
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-# ========== Registration ==========
-
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def register_user(
     user_data: UserCreate,
@@ -32,21 +28,19 @@ def register_user(
 ):
     """
     Register a new user account.
-
+    
     Args:
         user_data: User registration data (email, name, password)
         db: Database session
-
+    
     Returns:
         The newly created user object (without password)
-
+    
     Raises:
         HTTPException 400: Email already registered
     """
     return AuthService.register_user(db, user_data)
 
-
-# ========== Login ==========
 
 @router.post("/login", response_model=Token)
 def login_user(
@@ -55,14 +49,14 @@ def login_user(
 ):
     """
     Authenticate a user with email and password.
-
+    
     Args:
         form_data: OAuth2 password request form (username=email, password)
         db: Database session
-
+    
     Returns:
         JWT access token
-
+    
     Raises:
         HTTPException 401: Invalid credentials
     """
@@ -70,9 +64,7 @@ def login_user(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# ========== Google OAuth ==========
-
-# Initialize OAuth client for Google
+# Initialize OAuth client for Google authentication
 oauth = OAuth()
 oauth.register(
     name="google",
@@ -90,11 +82,11 @@ async def google_login(
 ):
     """
     Redirect user to Google OAuth login page.
-
+    
     Args:
         request: FastAPI request object
         return_url: URL to redirect after successful authentication
-
+    
     Returns:
         RedirectResponse to Google OAuth
     """
@@ -110,18 +102,17 @@ async def google_callback(
 ):
     """
     Handle Google OAuth callback after user authorization.
-
-    This endpoint receives the authorization code from Google,
-    exchanges it for an access token, and either creates a new user
-    or logs in an existing user.
-
+    
+    Receives the authorization code from Google, exchanges it for an access token,
+    and either creates a new user or logs in an existing user.
+    
     Args:
         request: FastAPI request object
         db: Database session
-
+    
     Returns:
         RedirectResponse to frontend with JWT token
-
+    
     Raises:
         HTTPException 400: Google authentication failed
     """
@@ -170,18 +161,16 @@ async def google_callback(
         )
 
 
-# ========== User Profile ==========
-
 @router.get("/users/me", response_model=UserOut)
 def get_current_user_info(
     current_user: User = Depends(get_current_active_user)
 ):
     """
     Get the current authenticated user's profile.
-
+    
     Args:
         current_user: Authenticated user object
-
+    
     Returns:
         User profile data
     """
@@ -196,12 +185,12 @@ def update_current_user(
 ):
     """
     Update the current user's profile.
-
+    
     Args:
         user_data: Updated user data (name, avatar_url)
         current_user: Authenticated user object
         db: Database session
-
+    
     Returns:
         Updated user object
     """

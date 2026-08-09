@@ -1,10 +1,7 @@
 """
 Comment API endpoints.
-
-This module handles comment operations on tasks including:
-- Adding comments with mentions
-- Retrieving all comments for a task
-- Soft deleting comments
+Handles comment operations on tasks including adding comments with mentions,
+retrieving all comments for a task, and soft deleting comments.
 """
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -28,19 +25,18 @@ def add_comment(
 ):
     """
     Add a comment to a task.
-
-    Supports:
-    - Mentioning other users (via @mentions)
-
+    
+    Supports mentioning other users via @mentions.
+    
     Args:
-        task_id: ID of the task to comment on
+        task_id: The ID of the task to comment on
         comment_data: Comment content and mentions
-        current_user: Authenticated user
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         The newly created comment object
-
+    
     Raises:
         HTTPException 404: Task not found
         HTTPException 403: User is not a project member
@@ -62,17 +58,17 @@ def get_task_comments(
 ):
     """
     Retrieve all comments for a task.
-
-    Includes author information.
-
+    
+    Includes author information for each comment.
+    
     Args:
-        task_id: ID of the task
-        current_user: Authenticated user (for membership verification)
+        task_id: The ID of the task
+        current_user: The authenticated user (for membership verification)
         db: Database session
-
+    
     Returns:
         List of comment objects with author_name
-
+    
     Raises:
         HTTPException 404: Task not found
         HTTPException 403: User is not a project member
@@ -88,17 +84,17 @@ def delete_comment(
 ):
     """
     Soft delete a comment.
-
+    
     Only the comment author, Admin, or Owner can delete a comment.
-
+    
     Args:
-        comment_id: ID of the comment to delete
-        current_user: Authenticated user
+        comment_id: The ID of the comment to delete
+        current_user: The authenticated user
         db: Database session
-
+    
     Returns:
         None (204 No Content)
-
+    
     Raises:
         HTTPException 404: Comment not found
         HTTPException 403: User lacks permission

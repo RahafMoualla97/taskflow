@@ -1,4 +1,3 @@
-// frontend/src/pages/NotificationsPage.tsx
 import { useEffect, useState } from 'react';
 import apiClient from '../api/client';
 import { BellIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
@@ -19,11 +18,9 @@ const NotificationsPage = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ جلب الإشعارات باستخدام apiClient
   const fetchNotifications = async () => {
     try {
       const response = await apiClient.get('/notifications');
-      console.log('📨 Notifications fetched:', response.data.length);
       setNotifications(response.data);
     } catch (error) {
       console.error('Error fetching notifications:', error);

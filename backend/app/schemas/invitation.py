@@ -1,7 +1,7 @@
 """
 Invitation Pydantic schemas.
 
-This module defines the request/response schemas for:
+Defines request/response schemas for:
 - Creating project/task invitations
 - Accepting invitations
 - Invitation status and details

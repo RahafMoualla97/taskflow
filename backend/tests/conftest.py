@@ -1,5 +1,8 @@
 """
 Pytest configuration and fixtures for TaskFlow tests.
+
+Provides test database setup, fixtures for users, projects, tasks,
+and authentication headers for integration testing.
 """
 import pytest
 from fastapi.testclient import TestClient
@@ -20,9 +23,9 @@ from app.models.notification import Notification
 from app.models.activity import Activity
 from app.models.timesheet import Timesheet
 
-# ========== Test Database Configuration ==========
 
-# Use SQLite in-memory for fast tests
+# Test Database Configuration
+# Use SQLite in-memory for fast, isolated tests
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
 engine = create_engine(
@@ -37,12 +40,15 @@ TestingSessionLocal = sessionmaker(
 )
 
 
-# ========== Fixtures ==========
+# Fixtures
 
 @pytest.fixture(scope="function")
 def db_session():
-    """Create a fresh database session for each test."""
-    # Create all tables
+    """
+    Create a fresh database session for each test.
+
+    Creates all tables, yields a session, and cleans up after the test.
+    """
     Base.metadata.create_all(bind=engine)
     
     session = TestingSessionLocal()
@@ -51,14 +57,16 @@ def db_session():
     finally:
         session.rollback()
         session.close()
-        # Drop all tables after test
         Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture(scope="function")
 def client(db_session):
-    """Create a test client with database session override."""
-    
+    """
+    Create a test client with database session override.
+
+    Overrides the get_db dependency to use the test database session.
+    """
     def override_get_db():
         try:
             yield db_session
@@ -117,7 +125,6 @@ def test_project(db_session, test_user):
     db_session.commit()
     db_session.refresh(project)
     
-    # Add owner as member
     member = ProjectMember(
         project_id=project.id,
         user_id=test_user.id,
