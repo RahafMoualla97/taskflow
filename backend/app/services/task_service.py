@@ -518,7 +518,7 @@ class TaskService:
         user_id: int,
         content: str,
         mentions: List[int] = []
-    ) -> Comment:
+    ) -> dict:
         """
         Add a comment to a task with support for mentions.
 
@@ -530,7 +530,7 @@ class TaskService:
             mentions: List of mentioned user IDs
 
         Returns:
-            The newly created Comment object
+            The newly created comment object with author information
 
         Raises:
             HTTPException 404: Task not found
@@ -566,8 +566,9 @@ class TaskService:
         db.add(new_comment)
         db.flush()
 
+        # Get author name
         author = db.query(User).filter(User.id == user_id).first()
-        author_name = author.name if author else "Someone"
+        author_name = author.name if author else "Unknown"
 
         ActivityService.log_activity(
             db=db,
@@ -609,7 +610,18 @@ class TaskService:
 
         db.commit()
         db.refresh(new_comment)
-        return new_comment
+
+        # Return comment with author_name
+        return {
+            "id": new_comment.id,
+            "content": new_comment.content,
+            "task_id": new_comment.task_id,
+            "author_id": new_comment.author_id,
+            "author_name": author_name,
+            "mentions": new_comment.mentions,
+            "created_at": new_comment.created_at,
+            "updated_at": new_comment.updated_at,
+        }
 
     @staticmethod
     def get_task_comments(db: Session, task_id: int, user_id: int) -> List[dict]:
